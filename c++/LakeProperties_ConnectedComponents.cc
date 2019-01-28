@@ -12,7 +12,7 @@ LakePropertiesCC::LakePropertiesCC(unsigned int n_rows,
     m_lake_depth(lake_depth), m_cell_area(cell_area),
     m_lake_ids(lake_ids) {
   m_mask_run = new int [m_nRows * m_nCols];
-  for (int i=0; i<(m_nRows * m_nCols); i++) {
+  for (unsigned int i=0; i<(m_nRows * m_nCols); i++) {
     m_mask_run[i] = 0;
     m_lake_ids[i]  = -1;
   }
