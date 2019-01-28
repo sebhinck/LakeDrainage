@@ -23,7 +23,11 @@ cdef class LakeDrainage:
   
   cdef readonly int xDim, yDim
   
-  def __init__(self, cnp.ndarray[double, ndim=2, mode="c"] depth, cnp.ndarray[double, ndim=2, mode="c"] topg, cnp.ndarray[double, ndim=2, mode="c"] thk, cnp.ndarray[int, ndim=2, mode="c"] ocean_mask, double cell_area):
+  def __init__(self, cnp.ndarray[double, ndim=2, mode="c"] depth, 
+                     cnp.ndarray[double, ndim=2, mode="c"] topg, 
+                     cnp.ndarray[double, ndim=2, mode="c"] thk, 
+                     cnp.ndarray[int, ndim=2, mode="c"] ocean_mask, 
+                     double cell_area):
  
     self.depth = depth
     self.topg = topg
@@ -40,7 +44,7 @@ cdef class LakeDrainage:
     cdef int N_lakes_int
     cdef cnp.npy_intp N_lakes[1]
     
-    LakeDrainageModel.test(self.xDim, self.yDim, cell_area, &c_depth[0, 0], &c_lake_mask[0, 0], N_lakes_int, area_ptr, volume_ptr)
+    LakeDrainageModel.runLakePropertiesCC(self.xDim, self.yDim, cell_area, &c_depth[0, 0], &c_lake_mask[0, 0], N_lakes_int, area_ptr, volume_ptr)
 
     N_lakes[0] = N_lakes_int
     
@@ -49,6 +53,9 @@ cdef class LakeDrainage:
     
     self.volume = cnp.PyArray_SimpleNewFromData(1, N_lakes, cnp.NPY_DOUBLE, volume_ptr)
     PyArray_ENABLEFLAGS(self.volume, cnp.NPY_OWNDATA)
+    
+    
+    
     
     
     
