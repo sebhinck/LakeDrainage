@@ -156,7 +156,7 @@ void LakePropertiesCC::labelRuns(unsigned int run_number,
                                  std::vector<double> &depths_sum,
                                  int &N_lakes) {
   unsigned int label = 0;
-  for(unsigned int k = 0; k <= run_number; ++k) {
+  for(unsigned int k = 1; k <= run_number; ++k) {
     if(parents[k] == 0) {
       parents[k] = label;
       label += 1;
