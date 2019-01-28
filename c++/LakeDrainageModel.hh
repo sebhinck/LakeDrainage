@@ -1,6 +1,6 @@
 #ifndef _LAKEDRAIANGEMODEL_H_
 #define _LAKEDRAIANGEMODEL_H_
 
-void test(double *topg, int xDim, int yDim, int*& ptr, int &size);
+void test(int xDim, int yDim, double cell_area, double *depth, int *lake_ids, int &N_lakes, double *&area, double *&volume);
 
 #endif

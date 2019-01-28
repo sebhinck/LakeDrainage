@@ -1,18 +1,16 @@
 #include "LakeDrainageModel.hh"
+#include "LakeProperties_ConnectedComponents.hh"
 
-void test(double *topg, int xDim, int yDim, int*& ptr, int &size) {
+void test(int xDim, int yDim, double cell_area, double *depth, int *lake_ids, int &N_lakes, double *&area, double *&volume) {
 
-  size = 30;
-  ptr = new int[size];
-  for (int j=0; j<size; j++) {
-    ptr[j] = j+1;
-  }
-  
+  {
+    LakePropertiesCC LPCC = LakePropertiesCC((unsigned int) yDim,
+                                             (unsigned int) xDim,
+                                             cell_area,
+                                             depth,
+                                             lake_ids);
 
-  for(int i=0; i<xDim; i++) {
-    for(int j=0; j<yDim; j++) {
-      topg[(i * yDim+ j)] = 1.;
-    }
+    LPCC.run(N_lakes, area, volume);
   }
 
 }

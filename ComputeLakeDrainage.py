@@ -21,6 +21,9 @@ def LakeDrainage(fIn, tind):
   except:
     x = np.arange(0, shape[1])
 
+  dx = (x[1] - x[0]).astype("double")
+  cell_area = dx * dx
+
   try:
     y = ncIn.variables['y'][:]
   except:
@@ -31,6 +34,12 @@ def LakeDrainage(fIn, tind):
   except:
     print("   -> Setting it to zero")
     thk = np.zeros(shape)
+    
+  try:
+    depth = getNcVarSlice(ncIn, 'lake_depth', tind, shape)
+  except:
+    print("   -> Setting it to zero")
+    depth = np.zeros(shape)
 
   try:
     ocean_mask = getNcVarSlice(ncIn, 'ocean_mask', tind, shape)
@@ -42,9 +51,11 @@ def LakeDrainage(fIn, tind):
 
   ncIn.close()
 
-  test = LD.LakeDrainage(topg, thk, ocean_mask)
+  test = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area)
 
-  print(test.cpp_array)
+  print(test.lake_mask)
+  print(test.area)
+  print(test.volume)
 
 
 def getNcVarSlice(nc, varname, tind = -1, shape = None):
