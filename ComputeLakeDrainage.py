@@ -53,9 +53,51 @@ def LakeDrainage(fIn, tind):
 
   test = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area)
 
-  print(test.lake_mask)
-  print(test.area)
-  print(test.volume)
+  area = np.zeros(shape)
+  volume = np.zeros(shape)
+  
+  for i in range(len(test.area)):
+    area_i = test.area[i]
+    volume_i = test.volume[i]
+    
+    i_mask = (test.lake_mask == i)
+    
+    area[i_mask] = area_i/(1000. * 1000.)
+    volume[i_mask] = volume_i/(1000. * 1000. * 1000.)
+  
+  
+  ncOut = Dataset('out.nc', 'w')
+
+  missing_value = -2.e+09
+
+  xDim = ncOut.createDimension('x', len(x))
+  yDim = ncOut.createDimension('y', len(y))
+
+  x_out = ncOut.createVariable('x','f4', ['x'])
+  x_out.units = "m"
+  y_out = ncOut.createVariable('y','f4', ['y'])
+  y_out.units = "m"
+
+  x_out[:] = x[:]
+  y_out[:] = y[:]
+
+  depth_out = ncOut.createVariable('depth','f4', ['y','x'])
+  depth_out[:] = depth[:,:]
+  depth_out.units = "m"
+
+  lake_ids_out = ncOut.createVariable('lake_ids','i', ['y','x'], fill_value=-1)
+  lake_ids_out[:] = test.lake_mask[:,:]
+  lake_ids_out.units = "1"
+  
+  area_out = ncOut.createVariable('area','f4', ['y','x'])
+  area_out[:] = area[:,:]
+  area_out.units = "km2"
+  
+  vol_out = ncOut.createVariable('volume','f4', ['y','x'])
+  vol_out[:] = volume[:,:]
+  vol_out.units = "km3"
+
+  ncOut.close()
 
 
 def getNcVarSlice(nc, varname, tind = -1, shape = None):
