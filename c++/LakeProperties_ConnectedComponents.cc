@@ -72,7 +72,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume) {
 }
 
 bool LakePropertiesCC::ForegroundCond(unsigned int r, unsigned int c) {
-  return (m_lake_depth[r * m_nCols + c] > 0);
+  return (m_lake_depth[r * m_nCols + c] > 0.0);
 }
 
 void LakePropertiesCC::labelMap(unsigned int run_number,
@@ -121,7 +121,7 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
   if((c > 0) && (m_mask_run[r*m_nCols + (c-1)] > 0)) {
     // one to the left is also foreground: continue the run
     lengths[run_number] += 1;
-    depths_sum[run_number] += m_lake_depth[(r - 1) * m_nCols + c];
+    depths_sum[run_number] += m_lake_depth[r * m_nCols + c];
   } else {
     //one to the left is a background pixel (or this is column 0): start a new run
     unsigned int parent;
@@ -138,7 +138,7 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
     columns[run_number] = c;
     parents[run_number] = parent;
     lengths[run_number] = 1;
-    depths_sum[run_number] = m_lake_depth[(r - 1) * m_nCols + c];
+    depths_sum[run_number] = m_lake_depth[r * m_nCols + c];
   }
 
   if((r > 0) and (m_mask_run[(r - 1) * m_nCols + c] > 0)) {
