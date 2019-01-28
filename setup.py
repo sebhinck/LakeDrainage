@@ -8,8 +8,8 @@ from glob import glob
 extra_compile_args=["-O3", "-ffast-math"]
 
 sources = ['cython/LakeDrainageModel.pyx']
-sources += glob('c++/LakeDrainageModel.cc')
-#sources += glob('c++/*.cc')
+#sources += glob('c++/LakeDrainageModel.cc')
+sources += glob('c++/*.cc')
 inc_dirs = [numpy.get_include()]
 inc_dirs += ['c++/']
 
