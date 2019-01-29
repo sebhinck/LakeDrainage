@@ -6,7 +6,7 @@ import LakeDrainage as LD
 import ctypes
 
 
-def LakeDrainage(fIn, tind):
+def LakeDrainage(fIn, tind, rho_i, rho_w, hmax, dh):
   from netCDF4 import Dataset
   #import LakeCC as LCC
 
@@ -51,7 +51,7 @@ def LakeDrainage(fIn, tind):
 
   ncIn.close()
 
-  test = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area)
+  test = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w, hmax, dh)
 
   area = np.zeros(shape)
   volume = np.zeros(shape)
@@ -96,6 +96,10 @@ def LakeDrainage(fIn, tind):
   vol_out = ncOut.createVariable('volume','f4', ['y','x'])
   vol_out[:] = volume[:,:]
   vol_out.units = "km3"
+  
+  drainmask_out = ncOut.createVariable('drain_mask','i', ['y','x'])
+  drainmask_out[:] = test.drainage_mask[:,:]
+  drainmask_out.units = "1"
 
   ncOut.close()
 
@@ -123,7 +127,7 @@ def getNcVarSlice(nc, varname, tind = -1, shape = None):
 def main():
   options = parse_args()
 
-  LakeDrainage(options.fIn, options.tind)
+  LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow, options.hmax, options.dh)
 
 def parse_args():
   from argparse import ArgumentParser
@@ -133,6 +137,10 @@ def parse_args():
   parser.description = "Find drainage route of lakes"
   parser.add_argument("-i", "--input",  dest="fIn",  required=True, help="Input file", metavar="FILE", type=lambda x: is_valid_file(parser, x))
   parser.add_argument('-tind', "--time-index", dest="tind", help="index of time dimension", default=-1, type=int)
+  parser.add_argument('-rho_i', "--ice_density", dest="rhoi", help="Density of ice", default=910., type=float)
+  parser.add_argument('-rho_w', "--fresh_water_density", dest="rhow", help="Density of fresh water", default=1000., type=float)
+  parser.add_argument('-h_max', "--max_level", dest="hmax", help="Max fill level", default=10000., type=float)
+  parser.add_argument('-dh', "--level_spacing", dest="dh", help="Level spacing", default=1., type=float)
 
   options = parser.parse_args()
   return options

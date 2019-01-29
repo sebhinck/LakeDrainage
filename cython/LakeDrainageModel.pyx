@@ -5,6 +5,15 @@ cimport numpy as cnp
 cimport LakeDrainageModel
 import ctypes
 
+
+cdef enum sink:
+  UNDEFINED=-6,
+  OCEAN=-5,
+  NORTH=-4,
+  EAST=-3,
+  SOUTH=-2,
+  WEST=-1
+
 cnp.import_array()
 
 
@@ -21,13 +30,17 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray area
   cdef readonly cnp.ndarray volume
   
+  cdef readonly cnp.ndarray surf_eff
+  cdef readonly cnp.ndarray drainage_mask
+  
   cdef readonly int xDim, yDim
   
   def __init__(self, cnp.ndarray[double, ndim=2, mode="c"] depth, 
                      cnp.ndarray[double, ndim=2, mode="c"] topg, 
                      cnp.ndarray[double, ndim=2, mode="c"] thk, 
                      cnp.ndarray[int, ndim=2, mode="c"] ocean_mask, 
-                     double cell_area):
+                     double cell_area, double rho_i, double rho_w,
+                     double hmax, double dh):
  
     self.depth = depth
     self.topg = topg
@@ -55,7 +68,14 @@ cdef class LakeDrainage:
     PyArray_ENABLEFLAGS(self.volume, cnp.NPY_OWNDATA)
     
     
+    self.surf_eff = self.topg + rho_w / rho_i * self.thk
+    self.drainage_mask = self.lake_mask.copy()
     
-    
+    self.drainage_mask[self.drainage_mask == -1] = sink.UNDEFINED
+    self.drainage_mask[0,:]  = sink.SOUTH
+    self.drainage_mask[-1,:] = sink.NORTH
+    self.drainage_mask[:,0]  = sink.WEST
+    self.drainage_mask[:,-1] = sink.EAST
+    self.drainage_mask[self.ocean_mask == 1] = sink.OCEAN
     
     
