@@ -97,9 +97,13 @@ def LakeDrainage(fIn, tind, rho_i, rho_w, hmax, dh):
   vol_out[:] = volume[:,:]
   vol_out.units = "km3"
   
-  drainmask_out = ncOut.createVariable('drain_mask','i', ['y','x'])
-  drainmask_out[:] = test.drainage_mask[:,:]
-  drainmask_out.units = "1"
+  basin_id_out = ncOut.createVariable('basin_id','i', ['y','x'])
+  basin_id_out[:] = test.basin_id[:,:]
+  basin_id_out.units = "1"
+
+  drain_dir_out = ncOut.createVariable('drain_dir','i', ['y','x'])
+  drain_dir_out[:] = test.drain_dir[:,:]
+  drain_dir_out.units = "1"
 
   ncOut.close()
 

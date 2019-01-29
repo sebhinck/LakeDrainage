@@ -7,7 +7,8 @@ public:
              unsigned int n_cols,
              int &N_basins,
              double *usurf, 
-             int *basin_mask);
+             int *basin_id,
+             int *drain_dir);
   virtual ~LakeBasins();
   void run();
 
@@ -32,13 +33,14 @@ public:
     NW=8
   };
 
-  NEIGHBOR m_directions[8] = {NEIGHBOR::N, NEIGHBOR::E, NEIGHBOR::S, NEIGHBOR::W, NEIGHBOR::NE, NEIGHBOR::SE, NEIGHBOR::SW, NEIGHBOR::NW};
+  NEIGHBOR m_directions[8] = {NEIGHBOR::N, NEIGHBOR::NE, NEIGHBOR::E, NEIGHBOR::SE, NEIGHBOR::S, NEIGHBOR::SW, NEIGHBOR::W, NEIGHBOR::NW};
 
 protected:
   unsigned int m_nRows, m_nCols;
   double *m_usurf;
   double m_cell_area;
-  int *m_basin_mask;
+  int *m_basin_id;
+  int *m_drain_dir;
   int &m_N_basins;
 
 private:

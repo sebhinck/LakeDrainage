@@ -8,11 +8,15 @@ LakeBasins::LakeBasins(unsigned int n_rows,
                        unsigned int n_cols,
                        int &N_basins,
                        double *usurf,
-                       int *basin_mask)
+                       int *basin_id,
+                       int *drain_dir)
   : m_nRows(n_rows), m_nCols(n_cols),
     m_N_basins(N_basins),
-    m_usurf(usurf), m_basin_mask(basin_mask) {
-  //Do nothing
+    m_usurf(usurf), m_basin_id(basin_id),
+    m_drain_dir(drain_dir) {
+  for (unsigned int i=0; i<(m_nRows * m_nCols); i++) {
+    m_drain_dir[i] = NEIGHBOR::SELF;
+  }
 }
 
 LakeBasins::~LakeBasins() {
@@ -26,6 +30,8 @@ void LakeBasins::run() {
   
 }
 
+
+
 void LakeBasins::findBasins() {
   for (unsigned int y = 0; y < m_nRows; ++y) {
     for (unsigned int x = 0; x < m_nCols; ++x) {
@@ -36,13 +42,14 @@ void LakeBasins::findBasins() {
 
 int LakeBasins::assignBasin(int x, int y) {
   const unsigned int idx = ind2idx(x, y);
-  int self = m_basin_mask[idx];
+  int self = m_basin_id[idx];
 
   if (self == SINK::UNDEFINED) {
-    NEIGHBOR parent = findLowestNeighbor(x, y);
-    if (parent != NEIGHBOR::SELF) {
+    NEIGHBOR low_neighbor = findLowestNeighbor(x, y);
+    m_drain_dir[idx] = low_neighbor;
+    if (low_neighbor != NEIGHBOR::SELF) {
       int xn, yn;
-      neighborInd_safe(parent, x, y, xn, yn);
+      neighborInd_safe(low_neighbor, x, y, xn, yn);
       self = assignBasin(xn, yn);
     } else {
       //Lowest point...
@@ -51,7 +58,7 @@ int LakeBasins::assignBasin(int x, int y) {
       self = m_N_basins;
       m_N_basins += 1;
     }
-    m_basin_mask[idx] = self;
+    m_basin_id[idx] = self;
   }
 
   return self;

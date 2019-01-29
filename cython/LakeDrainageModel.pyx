@@ -18,7 +18,7 @@ cnp.import_array()
 
 
 cdef extern from "numpy/ndarraytypes.h":
-    void PyArray_ENABLEFLAGS(cnp.ndarray arr, int flags)
+  void PyArray_ENABLEFLAGS(cnp.ndarray arr, int flags)
 
 cdef class LakeDrainage:
 
@@ -30,8 +30,10 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray area
   cdef readonly cnp.ndarray volume
 
+  cdef readonly cnp.ndarray usurf
   cdef readonly cnp.ndarray surf_eff
-  cdef readonly cnp.ndarray drainage_mask
+  cdef readonly cnp.ndarray basin_id
+  cdef readonly cnp.ndarray drain_dir
 
   cdef readonly int xDim, yDim
 
@@ -56,7 +58,7 @@ cdef class LakeDrainage:
     cdef double *volume_ptr;
     cdef int N_lakes_int
     cdef cnp.npy_intp N_lakes[1]
-    
+
     LakeDrainageModel.runLakePropertiesCC(self.xDim, self.yDim, cell_area, &c_depth[0, 0], &c_lake_mask[0, 0], N_lakes_int, area_ptr, volume_ptr)
 
     N_lakes[0] = N_lakes_int
@@ -68,20 +70,24 @@ cdef class LakeDrainage:
     PyArray_ENABLEFLAGS(self.volume, cnp.NPY_OWNDATA)
 
 
+    self.usurf = self.topg + self.thk
     self.surf_eff = self.topg + rho_w / rho_i * self.thk
-    self.drainage_mask = self.lake_mask.copy()
+    self.basin_id = self.lake_mask.copy()
 
-    self.drainage_mask[self.drainage_mask == -1] = sink.UNDEFINED
-    self.drainage_mask[0,:]  = sink.SOUTH
-    self.drainage_mask[-1,:] = sink.NORTH
-    self.drainage_mask[:,0]  = sink.WEST
-    self.drainage_mask[:,-1] = sink.EAST
-    self.drainage_mask[self.ocean_mask == 1] = sink.OCEAN
+    self.basin_id[self.lake_mask == -1] = sink.UNDEFINED
+    self.basin_id[0,:]  = sink.SOUTH
+    self.basin_id[-1,:] = sink.NORTH
+    self.basin_id[:,0]  = sink.WEST
+    self.basin_id[:,-1] = sink.EAST
+    self.basin_id[self.ocean_mask == 1] = sink.OCEAN
 
-    cdef double[:,:] c_usurf = self.surf_eff
-    cdef int[:,:] c_drainage_mask = self.drainage_mask
+    self.drain_dir = np.zeros_like(self.topg, dtype=ctypes.c_int)
+
+    cdef double[:,:] c_usurf = self.usurf
+    cdef int[:,:] c_basin_id = self.basin_id
+    cdef int[:,:] c_drain_dir = self.drain_dir
 
     cdef int N_basins_int
 
-    LakeDrainageModel.findDrainageBasins(self.xDim, self.yDim, &c_usurf[0, 0], &c_drainage_mask[0, 0], N_basins_int)
+    LakeDrainageModel.findDrainageBasins(self.xDim, self.yDim, &c_usurf[0, 0], &c_basin_id[0, 0], &c_drain_dir[0, 0], N_basins_int)
 
