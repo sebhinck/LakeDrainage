@@ -5,7 +5,7 @@ import numpy
 import os
 from glob import glob
 
-extra_compile_args=["-O3", "-ffast-math"]
+extra_compile_args=["-O3", "-ffast-math", "-std=c++11"]
 
 sources = ['cython/LakeDrainageModel.pyx']
 #sources += glob('c++/LakeDrainageModel.cc')
