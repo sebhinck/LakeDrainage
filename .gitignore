@@ -4,3 +4,4 @@ cython/LakeDrainageModel.cpp
 *.grd.gz
 build/
 *.so
+ComputeLakeDrainage.pyc

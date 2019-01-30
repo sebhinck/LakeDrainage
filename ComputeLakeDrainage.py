@@ -2,13 +2,11 @@
 
 from __future__ import absolute_import, division, print_function
 
-import LakeDrainage as LD
-import ctypes
 
-
-def LakeDrainage(fIn, tind, rho_i, rho_w, hmax, dh):
+def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., hmax = 100000. , dh = 1.):
   from netCDF4 import Dataset
-  #import LakeCC as LCC
+  import ctypes
+  import LakeDrainage as LD
 
   print ("Reading file "+fIn+" ...")
   ncIn = Dataset(fIn, 'r')
@@ -51,61 +49,9 @@ def LakeDrainage(fIn, tind, rho_i, rho_w, hmax, dh):
 
   ncIn.close()
 
-  test = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w, hmax, dh)
+  result = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w, hmax, dh)
 
-  area = np.zeros(shape)
-  volume = np.zeros(shape)
-  
-  for i in range(len(test.area)):
-    area_i = test.area[i]
-    volume_i = test.volume[i]
-    
-    i_mask = (test.lake_mask == i)
-    
-    area[i_mask] = area_i/(1000. * 1000.)
-    volume[i_mask] = volume_i/(1000. * 1000. * 1000.)
-  
-  
-  ncOut = Dataset('out.nc', 'w')
-
-  missing_value = -2.e+09
-
-  xDim = ncOut.createDimension('x', len(x))
-  yDim = ncOut.createDimension('y', len(y))
-
-  x_out = ncOut.createVariable('x','f4', ['x'])
-  x_out.units = "m"
-  y_out = ncOut.createVariable('y','f4', ['y'])
-  y_out.units = "m"
-
-  x_out[:] = x[:]
-  y_out[:] = y[:]
-
-  depth_out = ncOut.createVariable('depth','f4', ['y','x'])
-  depth_out[:] = depth[:,:]
-  depth_out.units = "m"
-
-  lake_ids_out = ncOut.createVariable('lake_ids','i', ['y','x'], fill_value=-1)
-  lake_ids_out[:] = test.lake_mask[:,:]
-  lake_ids_out.units = "1"
-  
-  area_out = ncOut.createVariable('area','f4', ['y','x'])
-  area_out[:] = area[:,:]
-  area_out.units = "km2"
-  
-  vol_out = ncOut.createVariable('volume','f4', ['y','x'])
-  vol_out[:] = volume[:,:]
-  vol_out.units = "km3"
-  
-  basin_id_out = ncOut.createVariable('basin_id','i', ['y','x'])
-  basin_id_out[:] = test.basin_id[:,:]
-  basin_id_out.units = "1"
-
-  drain_dir_out = ncOut.createVariable('drain_dir','i', ['y','x'])
-  drain_dir_out[:] = test.drain_dir[:,:]
-  drain_dir_out.units = "1"
-
-  ncOut.close()
+  return result
 
 
 
