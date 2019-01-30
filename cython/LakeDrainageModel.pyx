@@ -34,7 +34,8 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray surf_eff
   cdef readonly cnp.ndarray basin_id
   cdef readonly cnp.ndarray drain_dir
-  cdef readonly cnp.ndarray drainage_idx
+  cdef readonly cnp.ndarray spillway_idx
+  cdef readonly cnp.ndarray drain_basin_id
 
   cdef readonly int xDim, yDim
 
@@ -59,7 +60,14 @@ cdef class LakeDrainage:
     cdef int N_lakes_int
     cdef cnp.npy_intp N_lakes[1]
 
-    LakeDrainageModel.runLakePropertiesCC(self.xDim, self.yDim, cell_area, &c_depth[0, 0], &c_lake_mask[0, 0], N_lakes_int, area_ptr, volume_ptr)
+    LakeDrainageModel.runLakePropertiesCC(self.xDim,
+                                          self.yDim,
+                                          cell_area,
+                                          &c_depth[0, 0],
+                                          &c_lake_mask[0, 0],
+                                          N_lakes_int,
+                                          area_ptr,
+                                          volume_ptr)
 
     N_lakes[0] = N_lakes_int
 
@@ -87,14 +95,25 @@ cdef class LakeDrainage:
     cdef int[:,:] c_basin_id = self.basin_id
     cdef int[:,:] c_drain_dir = self.drain_dir
 
-    cdef int *drainage_idx_ptr;
+    cdef int *spillway_idx_ptr;
+    cdef int *drain_basin_id_ptr;
     cdef int N_basins_int
     cdef cnp.npy_intp N_basins[1]
 
-    LakeDrainageModel.findDrainageBasins(self.xDim, self.yDim, &c_usurf[0, 0], &c_basin_id[0, 0], &c_drain_dir[0, 0], N_basins_int, drainage_idx_ptr)
+    LakeDrainageModel.findDrainageBasins(self.xDim,
+                                         self.yDim,
+                                         &c_usurf[0, 0],
+                                         &c_basin_id[0, 0],
+                                         &c_drain_dir[0, 0],
+                                         N_basins_int,
+                                         spillway_idx_ptr,
+                                         drain_basin_id_ptr)
 
     N_basins[0] = N_basins_int
 
-    self.drainage_idx = cnp.PyArray_SimpleNewFromData(1, N_basins, cnp.NPY_INT, drainage_idx_ptr)
-    PyArray_ENABLEFLAGS(self.drainage_idx, cnp.NPY_OWNDATA)
+    self.spillway_idx = cnp.PyArray_SimpleNewFromData(1, N_basins, cnp.NPY_INT, spillway_idx_ptr)
+    PyArray_ENABLEFLAGS(self.spillway_idx, cnp.NPY_OWNDATA)
+
+    self.drain_basin_id = cnp.PyArray_SimpleNewFromData(1, N_basins, cnp.NPY_INT, drain_basin_id_ptr)
+    PyArray_ENABLEFLAGS(self.drain_basin_id, cnp.NPY_OWNDATA)
 

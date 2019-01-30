@@ -24,24 +24,29 @@ LakeBasins::~LakeBasins() {
 }
 
 
-void LakeBasins::run(int *&spillway_idx) {
+void LakeBasins::run(int *&spillway_idx, int *&drain_basin_id) {
 
   findBasins();
   
   spillway_idx = new int[m_N_basins];
-  double spillway_height[m_N_basins];
+  drain_basin_id = new int[m_N_basins];
 
-  for (int i=0; i<m_N_basins; i++) {
-    spillway_idx[i] = -1;
-    spillway_height[i] = std::numeric_limits<double>::max();
-  }
-
-  findSpillways(spillway_idx, spillway_height);
+  findSpillways(spillway_idx, drain_basin_id);
 }
 
 
 
-void LakeBasins::findSpillways(int *spillway_idx, double *spillway_height) {
+void LakeBasins::findSpillways(int *spillway_idx, int *drain_basin_id) {
+
+  double spillway_height[m_N_basins],
+         spillway_neighbor_height[m_N_basins];
+
+  for (int i=0; i<m_N_basins; i++) {
+    spillway_idx[i] = -1;
+    drain_basin_id[i] = SINK::UNDEFINED;
+    spillway_height[i] = std::numeric_limits<double>::max();
+    spillway_neighbor_height[i] = std::numeric_limits<double>::max();
+  }
 
   for (unsigned int y = 0; y < m_nRows; ++y) {
     for (unsigned int x = 0; x < m_nCols; ++x) {
@@ -73,6 +78,12 @@ void LakeBasins::findSpillways(int *spillway_idx, double *spillway_height) {
             if (spillway_height[self_basin_id] > height) {
               spillway_height[self_basin_id] = height;
               spillway_idx[self_basin_id] = (int) idx;
+              spillway_neighbor_height[self_basin_id] = n_height;
+              drain_basin_id[self_basin_id] = n_basin_id;
+            } else if ((spillway_height[self_basin_id] == height) and (spillway_neighbor_height[self_basin_id] > n_height)) {
+              spillway_idx[self_basin_id] = (int) idx;
+              spillway_neighbor_height[self_basin_id] = n_height;
+              drain_basin_id[self_basin_id] = n_basin_id;
             }
           }
         } //neighbor loop
