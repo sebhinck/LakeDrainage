@@ -1,6 +1,6 @@
 #include "LakeBasins.hh"
 #include <cmath>
-
+#include<limits>
 #include<iostream>
 
 
@@ -24,13 +24,31 @@ LakeBasins::~LakeBasins() {
 }
 
 
-void LakeBasins::run() {
+void LakeBasins::run(int *&spillway_idx) {
 
   findBasins();
   
+  spillway_idx = new int[m_N_basins];
+  double spillway_height[m_N_basins];
+
+  for (unsigned int i=0; i<m_N_basins; i++) {
+    spillway_idx[i] = -1;
+    spillway_height[i] = std::numeric_limits<double>::max();
+  }
+
+  findSpillways(spillway_idx, spillway_height);
 }
 
 
+
+void LakeBasins::findSpillways(int *spillway_idx, double *spillway_height) {
+
+  for (unsigned int y = 0; y < m_nRows; ++y) {
+    for (unsigned int x = 0; x < m_nCols; ++x) {
+      //Do Stuff
+    }
+  }
+}
 
 void LakeBasins::findBasins() {
   for (unsigned int y = 0; y < m_nRows; ++y) {

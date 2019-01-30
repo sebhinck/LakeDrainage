@@ -10,7 +10,7 @@ public:
              int *basin_id,
              int *drain_dir);
   virtual ~LakeBasins();
-  void run();
+  void run(int *&spillway_idx);
 
   enum SINK {
     UNDEFINED=-6,
@@ -62,6 +62,8 @@ private:
 
   void findBasins();
   int assignBasin(int x, int y);
+
+  void findSpillways(int *spillway_idx, double *spillway_height);
 
 };
 

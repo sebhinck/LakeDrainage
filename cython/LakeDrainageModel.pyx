@@ -34,6 +34,7 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray surf_eff
   cdef readonly cnp.ndarray basin_id
   cdef readonly cnp.ndarray drain_dir
+  cdef readonly cnp.ndarray drainage_idx
 
   cdef readonly int xDim, yDim
 
@@ -87,7 +88,14 @@ cdef class LakeDrainage:
     cdef int[:,:] c_basin_id = self.basin_id
     cdef int[:,:] c_drain_dir = self.drain_dir
 
+    cdef int *drainage_idx_ptr;
     cdef int N_basins_int
+    cdef cnp.npy_intp N_basins[1]
 
-    LakeDrainageModel.findDrainageBasins(self.xDim, self.yDim, &c_usurf[0, 0], &c_basin_id[0, 0], &c_drain_dir[0, 0], N_basins_int)
+    LakeDrainageModel.findDrainageBasins(self.xDim, self.yDim, &c_usurf[0, 0], &c_basin_id[0, 0], &c_drain_dir[0, 0], N_basins_int, drainage_idx_ptr)
+
+    N_basins[0] = N_basins_int
+
+    self.drainage_idx = cnp.PyArray_SimpleNewFromData(1, N_basins, cnp.NPY_INT, drainage_idx_ptr)
+    PyArray_ENABLEFLAGS(self.drainage_idx, cnp.NPY_OWNDATA)
 
