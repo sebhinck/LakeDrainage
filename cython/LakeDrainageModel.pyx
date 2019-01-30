@@ -42,8 +42,7 @@ cdef class LakeDrainage:
                      cnp.ndarray[double, ndim=2, mode="c"] topg, 
                      cnp.ndarray[double, ndim=2, mode="c"] thk, 
                      cnp.ndarray[int, ndim=2, mode="c"] ocean_mask, 
-                     double cell_area, double rho_i, double rho_w,
-                     double hmax, double dh):
+                     double cell_area, double rho_i, double rho_w):
  
     self.depth = depth
     self.topg = topg
@@ -84,7 +83,7 @@ cdef class LakeDrainage:
 
     self.drain_dir = np.zeros_like(self.topg, dtype=ctypes.c_int)
 
-    cdef double[:,:] c_usurf = self.usurf
+    cdef double[:,:] c_usurf = self.surf_eff #self.usurf
     cdef int[:,:] c_basin_id = self.basin_id
     cdef int[:,:] c_drain_dir = self.drain_dir
 

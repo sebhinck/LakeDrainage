@@ -31,7 +31,7 @@ void LakeBasins::run(int *&spillway_idx) {
   spillway_idx = new int[m_N_basins];
   double spillway_height[m_N_basins];
 
-  for (unsigned int i=0; i<m_N_basins; i++) {
+  for (int i=0; i<m_N_basins; i++) {
     spillway_idx[i] = -1;
     spillway_height[i] = std::numeric_limits<double>::max();
   }

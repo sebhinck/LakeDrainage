@@ -3,7 +3,7 @@
 from __future__ import absolute_import, division, print_function
 
 
-def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., hmax = 100000. , dh = 1.):
+def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
   from netCDF4 import Dataset
   import ctypes
   import LakeDrainage as LD
@@ -49,7 +49,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., hmax = 100000. , dh
 
   ncIn.close()
 
-  result = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w, hmax, dh)
+  result = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w)
 
   return result
 
@@ -78,7 +78,7 @@ def getNcVarSlice(nc, varname, tind = -1, shape = None):
 def main():
   options = parse_args()
 
-  LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow, options.hmax, options.dh)
+  LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow)
 
 def parse_args():
   from argparse import ArgumentParser
@@ -90,8 +90,6 @@ def parse_args():
   parser.add_argument('-tind', "--time-index", dest="tind", help="index of time dimension", default=-1, type=int)
   parser.add_argument('-rho_i', "--ice_density", dest="rhoi", help="Density of ice", default=910., type=float)
   parser.add_argument('-rho_w', "--fresh_water_density", dest="rhow", help="Density of fresh water", default=1000., type=float)
-  parser.add_argument('-h_max', "--max_level", dest="hmax", help="Max fill level", default=10000., type=float)
-  parser.add_argument('-dh', "--level_spacing", dest="dh", help="Level spacing", default=1., type=float)
 
   options = parser.parse_args()
   return options
