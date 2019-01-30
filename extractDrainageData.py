@@ -20,6 +20,7 @@ tinds = range(Nt)
 
 areas = [None] * Nt
 volumes = [None] * Nt
+max_depths = [None] * Nt
 spillway_idx = [None] * Nt
 drain_basin_id = [None] * Nt
 
@@ -94,6 +95,7 @@ for tind in tinds:
 
     areas[tind] = result.area.copy()
     volumes[tind] = result.volume.copy()
+    max_depths[tind] = result.max_depth.copy()
     spillway_idx[tind] = result.spillway_idx.copy()
     drain_basin_id[tind] = result.drain_basin_id.copy()
 
@@ -102,7 +104,7 @@ ncOut.close()
 pickleLakeName  = os.path.join(path_out, Name_prefix+"_lakes.pickle")
 pickleBasinName = os.path.join(path_out, Name_prefix+"_basins.pickle")
 
-data_lakes = {'area': areas, 'volumes': volumes}
+data_lakes = {'areas': areas, 'volumes': volumes, 'max_depths': max_depths}
 with open(pickleLakeName, 'wb') as f:
     # Pickle the 'data' dictionary using the highest protocol available.
     pickle.dump(data_lakes, f, pickle.HIGHEST_PROTOCOL)

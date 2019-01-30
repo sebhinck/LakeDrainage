@@ -84,15 +84,18 @@ def main():
 
   area = np.zeros(shape)
   volume = np.zeros(shape)
+  max_depth = np.zeros(shape)
 
   for i in range(len(result.area)):
     area_i = result.area[i]
     volume_i = result.volume[i]
+    max_depth_i = result.max_depth[i]
 
     i_mask = (result.lake_mask == i)
 
     area[i_mask] = area_i/(1000. * 1000.)
     volume[i_mask] = volume_i/(1000. * 1000. * 1000.)
+    max_depth[i_mask] = max_depth_i
 
   ncOut = Dataset('out.nc', 'w')
 
@@ -122,6 +125,10 @@ def main():
   vol_out = ncOut.createVariable('volume','f4', ['y','x'])
   vol_out[:] = volume[:,:]
   vol_out.units = "km3"
+
+  max_depth_out = ncOut.createVariable('max_depth','f4', ['y','x'])
+  max_depth_out[:] = max_depth[:,:]
+  max_depth_out.units = "m"
 
   basin_id_out = ncOut.createVariable('basin_id','i', ['y','x'])
   basin_id_out[:] = result.basin_id[:,:]

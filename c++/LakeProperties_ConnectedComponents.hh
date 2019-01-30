@@ -11,7 +11,7 @@ public:
                    double *lake_depth,
                    int *lake_ids);
   virtual ~LakePropertiesCC();
-  void run(int &N_lakes, double *&area, double *&volume);
+  void run(int &N_lakes, double *&area, double *&volume, double *&max_depth_out);
 
 protected:
   unsigned int m_nRows, m_nCols;
@@ -27,12 +27,14 @@ protected:
                             std::vector<unsigned int> &columns,
                             std::vector<unsigned int> &parents,
                             std::vector<unsigned int> &lengths,
-                            std::vector<double> &depths_sum);
+                            std::vector<double> &depths_sum,
+                            std::vector<double> &max_depth);
   virtual void labelRuns(unsigned int run_number,
                          std::vector<unsigned int> &parents,
                          std::vector<unsigned int> &lengths,
                          std::vector<unsigned int> &N_sum,
                          std::vector<double> &depths_sum,
+                         std::vector<double> &max_depth,
                          int &N_lakes);
   virtual bool ForegroundCond(unsigned int r,
                               unsigned int c);

@@ -23,11 +23,11 @@ LakePropertiesCC::~LakePropertiesCC() {
 }
 
 
-void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume) {
+void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double *&max_depth_out) {
   unsigned int max_items = 2 * m_nRows;
 
   std::vector<unsigned int> parents(max_items), lengths(max_items), rows(max_items), columns(max_items);
-  std::vector<double> depths_sum(max_items);
+  std::vector<double> depths_sum(max_items), max_depth(max_items);
 
   for(unsigned int i = 0; i < 1; ++i) {
     parents[i]    = 0;
@@ -42,7 +42,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume) {
   for (unsigned int r = 0; r < m_nRows; ++r) {
     for (unsigned int c = 0; c < m_nCols; ++c) {
       if (ForegroundCond(r, c)) {
-        checkForegroundPixel(c, r, run_number, rows, columns, parents, lengths, depths_sum);
+        checkForegroundPixel(c, r, run_number, rows, columns, parents, lengths, depths_sum, max_depth);
 
         if ((run_number + 1) == max_items) {
           max_items += m_nRows;
@@ -51,19 +51,22 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume) {
           rows.resize(max_items);
           columns.resize(max_items);
           depths_sum.resize(max_items);
+          max_depth.resize(max_items);
         }
       }
     }
   }
 
   std::vector<unsigned int> N_sum(run_number);
-  labelRuns(run_number, parents, lengths, N_sum, depths_sum, N_lakes);
+  labelRuns(run_number, parents, lengths, N_sum, depths_sum, max_depth, N_lakes);
   
   area   = new double[N_lakes];
   volume = new double[N_lakes];
+  max_depth_out = new double[N_lakes];
   for (int i=0; i<N_lakes; i++) {
     area[i]   = N_sum[i] * m_cell_area;
     volume[i] = depths_sum[i] * m_cell_area;
+    max_depth_out[i] = max_depth[i];
   }
   
   //N_lakes contains number of all lakes...
@@ -117,11 +120,13 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
                                         std::vector<unsigned int> &columns,
                                         std::vector<unsigned int> &parents,
                                         std::vector<unsigned int> &lengths,
-                                        std::vector<double> &depths_sum) {
+                                        std::vector<double> &depths_sum,
+                                        std::vector<double> &max_depth) {
   if((c > 0) && (m_mask_run[r*m_nCols + (c-1)] > 0)) {
     // one to the left is also foreground: continue the run
     lengths[run_number] += 1;
     depths_sum[run_number] += m_lake_depth[r * m_nCols + c];
+    max_depth[run_number] = std::max(max_depth[run_number], m_lake_depth[r * m_nCols + c]);
   } else {
     //one to the left is a background pixel (or this is column 0): start a new run
     unsigned int parent;
@@ -139,6 +144,7 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
     parents[run_number] = parent;
     lengths[run_number] = 1;
     depths_sum[run_number] = m_lake_depth[r * m_nCols + c];
+    max_depth[run_number] = m_lake_depth[r * m_nCols + c];
   }
 
   if((r > 0) and (m_mask_run[(r - 1) * m_nCols + c] > 0)) {
@@ -154,6 +160,7 @@ void LakePropertiesCC::labelRuns(unsigned int run_number,
                                  std::vector<unsigned int> &lengths,
                                  std::vector<unsigned int> &N_sum,
                                  std::vector<double> &depths_sum,
+                                 std::vector<double> &max_depth,
                                  int &N_lakes) {
   unsigned int label = 0;
   for(unsigned int k = 1; k <= run_number; ++k) {
@@ -162,10 +169,12 @@ void LakePropertiesCC::labelRuns(unsigned int run_number,
       label += 1;
       N_sum[parents[k]] = lengths[k];
       depths_sum[parents[k]] = depths_sum[k];
+      max_depth[parents[k]] = max_depth[k];
     } else {
       parents[k] = parents[parents[k]];
       N_sum[parents[k]] += lengths[k];
       depths_sum[parents[k]] += depths_sum[k];
+      max_depth[parents[k]] = std::max(max_depth[k], max_depth[parents[k]]);
     }
   }
 

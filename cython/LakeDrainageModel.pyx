@@ -31,6 +31,7 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray lake_mask
   cdef readonly cnp.ndarray area
   cdef readonly cnp.ndarray volume
+  cdef readonly cnp.ndarray max_depth
 
   cdef readonly cnp.ndarray usurf
   cdef readonly cnp.ndarray surf_eff
@@ -63,6 +64,7 @@ cdef class LakeDrainage:
     cdef int[:,:] c_lake_mask = self.lake_mask
     cdef double *area_ptr;
     cdef double *volume_ptr;
+    cdef double *max_depth_ptr;
     cdef int N_lakes_int
     cdef cnp.npy_intp N_lakes[1]
 
@@ -73,7 +75,8 @@ cdef class LakeDrainage:
                                           &c_lake_mask[0, 0],
                                           N_lakes_int,
                                           area_ptr,
-                                          volume_ptr)
+                                          volume_ptr,
+                                          max_depth_ptr)
 
     N_lakes[0] = N_lakes_int
 
@@ -83,6 +86,8 @@ cdef class LakeDrainage:
     self.volume = cnp.PyArray_SimpleNewFromData(1, N_lakes, cnp.NPY_DOUBLE, volume_ptr)
     PyArray_ENABLEFLAGS(self.volume, cnp.NPY_OWNDATA)
 
+    self.max_depth = cnp.PyArray_SimpleNewFromData(1, N_lakes, cnp.NPY_DOUBLE, max_depth_ptr)
+    PyArray_ENABLEFLAGS(self.max_depth, cnp.NPY_OWNDATA)
 
     self.usurf = self.topg + self.thk
     self.surf_eff = self.topg + rho_w / rho_i * self.thk

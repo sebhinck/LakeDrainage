@@ -2,7 +2,7 @@
 #include "LakeProperties_ConnectedComponents.hh"
 #include "LakeBasins.hh"
 
-void runLakePropertiesCC(int xDim, int yDim, double cell_area, double *depth, int *lake_ids, int &N_lakes, double *&area, double *&volume) {
+void runLakePropertiesCC(int xDim, int yDim, double cell_area, double *depth, int *lake_ids, int &N_lakes, double *&area, double *&volume, double *&max_depth) {
 
   LakePropertiesCC LPCC = LakePropertiesCC((unsigned int) yDim,
                                            (unsigned int) xDim,
@@ -10,7 +10,7 @@ void runLakePropertiesCC(int xDim, int yDim, double cell_area, double *depth, in
                                            depth,
                                            lake_ids);
 
-  LPCC.run(N_lakes, area, volume);
+  LPCC.run(N_lakes, area, volume, max_depth);
 }
 
 
