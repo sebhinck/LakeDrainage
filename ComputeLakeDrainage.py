@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 from __future__ import absolute_import, division, print_function
+from netCDF4 import Dataset
 
 
 def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
-  from netCDF4 import Dataset
   import ctypes
   import LakeDrainage as LD
 
@@ -78,7 +78,68 @@ def getNcVarSlice(nc, varname, tind = -1, shape = None):
 def main():
   options = parse_args()
 
-  LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow)
+  result = LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow)
+
+  ncIn = Dataset(options.fIn, 'r')
+
+  x = ncIn.variables['x'][:]
+  y = ncIn.variables['y'][:]
+
+  ncIn.close()
+
+  shape = [len(y), len(x)]
+
+  area = np.zeros(shape)
+  volume = np.zeros(shape)
+
+  for i in range(len(result.area)):
+    area_i = result.area[i]
+    volume_i = result.volume[i]
+
+    i_mask = (result.lake_mask == i)
+
+    area[i_mask] = area_i/(1000. * 1000.)
+    volume[i_mask] = volume_i/(1000. * 1000. * 1000.)
+
+  ncOut = Dataset('out.nc', 'w')
+
+  xDim = ncOut.createDimension('x', len(x))
+  yDim = ncOut.createDimension('y', len(y))
+
+  x_out = ncOut.createVariable('x','f4', ['x'])
+  x_out.units = "m"
+  y_out = ncOut.createVariable('y','f4', ['y'])
+  y_out.units = "m"
+
+  x_out[:] = x[:]
+  y_out[:] = y[:]
+
+  depth_out = ncOut.createVariable('depth','f4', ['y','x'])
+  depth_out[:] = result.depth[:,:]
+  depth_out.units = "m"
+
+  lake_ids_out = ncOut.createVariable('lake_ids','i', ['y','x'], fill_value=-1)
+  lake_ids_out[:] = result.lake_mask[:,:]
+  lake_ids_out.units = "1"
+
+  area_out = ncOut.createVariable('area','f4', ['y','x'])
+  area_out[:] = area[:,:]
+  area_out.units = "km2"
+
+  vol_out = ncOut.createVariable('volume','f4', ['y','x'])
+  vol_out[:] = volume[:,:]
+  vol_out.units = "km3"
+
+  basin_id_out = ncOut.createVariable('basin_id','i', ['y','x'])
+  basin_id_out[:] = result.basin_id[:,:]
+  basin_id_out.units = "1"
+
+  drain_dir_out = ncOut.createVariable('drain_dir','i', ['y','x'])
+  drain_dir_out[:] = result.drain_dir[:,:]
+  drain_dir_out.units = "1"
+
+  ncOut.close()
+
 
 def parse_args():
   from argparse import ArgumentParser
