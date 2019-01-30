@@ -15,7 +15,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
   shape = topg.shape
 
   try:
-    x = ncIn.variables['x'][:]
+    x = (ncIn.variables['x'][:]).astype("double")
   except:
     x = np.arange(0, shape[1])
 
@@ -23,7 +23,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
   cell_area = dx * dx
 
   try:
-    y = ncIn.variables['y'][:]
+    y = (ncIn.variables['y'][:]).astype("double")
   except:
     y = np.arange(0, shape[0])
 
@@ -49,7 +49,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
 
   ncIn.close()
 
-  result = LD.LakeDrainage(depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w)
+  result = LD.LakeDrainage(x, y, depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w)
 
   return result
 
@@ -80,14 +80,7 @@ def main():
 
   result = LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow)
 
-  ncIn = Dataset(options.fIn, 'r')
-
-  x = ncIn.variables['x'][:]
-  y = ncIn.variables['y'][:]
-
-  ncIn.close()
-
-  shape = [len(y), len(x)]
+  shape = [len(result.y), len(result.x)]
 
   area = np.zeros(shape)
   volume = np.zeros(shape)
@@ -103,16 +96,16 @@ def main():
 
   ncOut = Dataset('out.nc', 'w')
 
-  xDim = ncOut.createDimension('x', len(x))
-  yDim = ncOut.createDimension('y', len(y))
+  xDim = ncOut.createDimension('x', len(result.x))
+  yDim = ncOut.createDimension('y', len(result.y))
 
   x_out = ncOut.createVariable('x','f4', ['x'])
   x_out.units = "m"
   y_out = ncOut.createVariable('y','f4', ['y'])
   y_out.units = "m"
 
-  x_out[:] = x[:]
-  y_out[:] = y[:]
+  x_out[:] = result.x[:]
+  y_out[:] = result.y[:]
 
   depth_out = ncOut.createVariable('depth','f4', ['y','x'])
   depth_out[:] = result.depth[:,:]

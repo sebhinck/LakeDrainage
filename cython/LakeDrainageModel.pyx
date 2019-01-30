@@ -22,6 +22,8 @@ cdef extern from "numpy/ndarraytypes.h":
 
 cdef class LakeDrainage:
 
+  cdef readonly cnp.ndarray x
+  cdef readonly cnp.ndarray y
   cdef readonly cnp.ndarray depth
   cdef readonly cnp.ndarray topg
   cdef readonly cnp.ndarray thk
@@ -39,12 +41,16 @@ cdef class LakeDrainage:
 
   cdef readonly int xDim, yDim
 
-  def __init__(self, cnp.ndarray[double, ndim=2, mode="c"] depth, 
-                     cnp.ndarray[double, ndim=2, mode="c"] topg, 
-                     cnp.ndarray[double, ndim=2, mode="c"] thk, 
-                     cnp.ndarray[int, ndim=2, mode="c"] ocean_mask, 
+  def __init__(self, cnp.ndarray[double, ndim=1, mode="c"] x,
+                     cnp.ndarray[double, ndim=1, mode="c"] y,
+                     cnp.ndarray[double, ndim=2, mode="c"] depth,
+                     cnp.ndarray[double, ndim=2, mode="c"] topg,
+                     cnp.ndarray[double, ndim=2, mode="c"] thk,
+                     cnp.ndarray[int, ndim=2, mode="c"] ocean_mask,
                      double cell_area, double rho_i, double rho_w):
  
+    self.x = x
+    self.y = y
     self.depth = depth
     self.topg = topg
     self.thk = thk
