@@ -45,9 +45,42 @@ void LakeBasins::findSpillways(int *spillway_idx, double *spillway_height) {
 
   for (unsigned int y = 0; y < m_nRows; ++y) {
     for (unsigned int x = 0; x < m_nCols; ++x) {
-      //Do Stuff
-    }
-  }
+
+      const unsigned int self_idx = ind2idx(x, y);
+      const int self_basin_id = m_basin_id[self_idx];
+
+      if (self_basin_id >= 0) {
+        const double self_height = m_usurf[self_idx];
+        double height;
+        unsigned int idx;
+
+        for (unsigned int i=0; i<8; i++) {
+          const NEIGHBOR n = m_directions[i];
+          const unsigned int n_idx = neighborIdx(n, x, y);
+          const int n_basin_id = m_basin_id[n_idx];
+
+          if (n_basin_id != self_basin_id) {
+            const double n_height = m_usurf[n_idx];
+
+            if (n_height > self_height) {
+              height = n_height;
+              idx = n_idx;
+            } else {
+              height = self_height;
+              idx = self_idx;
+            }
+
+            if (spillway_height[self_basin_id] > height) {
+              spillway_height[self_basin_id] = height;
+              spillway_idx[self_basin_id] = (int) idx;
+            }
+          }
+        } //neighbor loop
+      } // if (self_basin_id >= 0)
+
+    } // x
+  } // y
+
 }
 
 void LakeBasins::findBasins() {
@@ -97,8 +130,8 @@ LakeBasins::NEIGHBOR LakeBasins::findLowestNeighbor(int x, int y) {
   
   for (unsigned int i=0; i<8; i++) {
     const NEIGHBOR n = m_directions[i];
-    const unsigned int ind = neighborIdx(n, x, y);
-    const double val = m_usurf[ind];
+    const unsigned int idx = neighborIdx(n, x, y);
+    const double val = m_usurf[idx];
     
     if (val < low_val) {
       low_val = val;

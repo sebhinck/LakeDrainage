@@ -108,6 +108,7 @@ def LakeDrainage(fIn, tind, rho_i, rho_w, hmax, dh):
   ncOut.close()
 
 
+
 def getNcVarSlice(nc, varname, tind = -1, shape = None):
   try:
     var = nc.variables[varname]
