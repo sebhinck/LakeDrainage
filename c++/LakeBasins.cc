@@ -17,7 +17,7 @@ LakeBasins::LakeBasins(unsigned int n_rows,
     m_usurf(usurf), m_basin_id(basin_id),
     m_drain_dir(drain_dir) {
 
-  if ((m_N_neighbors != 8) or (m_N_neighbors != 4)) {
+  if ((m_N_neighbors != 8) and (m_N_neighbors != 4)) {
     std::cout<<"N_neighbors can only be 4 or 8! Using default value 4!\n";
     m_N_neighbors = 4;
   }
