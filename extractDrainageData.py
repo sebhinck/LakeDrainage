@@ -5,7 +5,7 @@ import pickle
 
 import ComputeLakeDrainage
 
-fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km.nc'
+fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km_topg_filtered.nc'
 
 path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis'
 

@@ -28,6 +28,12 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
     y = np.arange(0, shape[0])
 
   try:
+    topg_filtered = getNcVarSlice(ncIn, 'topg_filtered', tind, shape)
+  except:
+    print("   -> Setting it to topg")
+    topg_filtered = topg
+
+  try:
     thk = getNcVarSlice(ncIn, 'thk', tind, shape)
   except:
     print("   -> Setting it to zero")
@@ -49,7 +55,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
 
   ncIn.close()
 
-  result = LD.LakeDrainage(x, y, depth, topg, thk, ocean_mask, cell_area, rho_i, rho_w)
+  result = LD.LakeDrainage(x, y, depth, topg_filtered, thk, ocean_mask, cell_area, rho_i, rho_w)
 
   return result
 
