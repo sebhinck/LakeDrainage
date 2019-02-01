@@ -108,7 +108,7 @@ cdef class LakeDrainage:
 
     cdef int *spillway_idx_ptr;
     cdef int *drain_basin_id_ptr;
-    cdef int N_basins_int
+    cdef int N_basins_int = N_lakes_int
     cdef cnp.npy_intp N_basins[1]
 
     LakeDrainageModel.findDrainageBasins(self.xDim,
