@@ -5,6 +5,7 @@ class LakeBasins {
 public:
   LakeBasins(unsigned int n_rows,
              unsigned int n_cols,
+             unsigned int N_neighbors,
              int &N_basins,
              double *usurf, 
              int *basin_id,
@@ -37,6 +38,7 @@ public:
 
 protected:
   unsigned int m_nRows, m_nCols;
+  unsigned int m_N_neighbors;
   double *m_usurf;
   double m_cell_area;
   int *m_basin_id;

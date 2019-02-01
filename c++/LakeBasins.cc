@@ -6,14 +6,22 @@
 
 LakeBasins::LakeBasins(unsigned int n_rows,
                        unsigned int n_cols,
+                       unsigned int N_neighbors,
                        int &N_basins,
                        double *usurf,
                        int *basin_id,
                        int *drain_dir)
   : m_nRows(n_rows), m_nCols(n_cols),
+    m_N_neighbors(N_neighbors),
     m_N_basins(N_basins),
     m_usurf(usurf), m_basin_id(basin_id),
     m_drain_dir(drain_dir) {
+
+  if ((m_N_neighbors != 8) or (m_N_neighbors != 4)) {
+    std::cout<<"N_neighbors can only be 4 or 8! Using default value 4!\n";
+    m_N_neighbors = 4;
+  }
+
   for (unsigned int i=0; i<(m_nRows * m_nCols); i++) {
     m_drain_dir[i] = NEIGHBOR::SELF;
   }
@@ -59,7 +67,7 @@ void LakeBasins::findSpillways(int *spillway_idx, int *drain_basin_id) {
         double height;
         unsigned int idx;
 
-        for (unsigned int i=0; i<8; i++) {
+        for (unsigned int i=0; i<m_N_neighbors; i++) {
           const NEIGHBOR n = m_directions[i];
           const unsigned int n_idx = neighborIdx(n, x, y);
           const int n_basin_id = m_basin_id[n_idx];
@@ -139,7 +147,7 @@ LakeBasins::NEIGHBOR LakeBasins::findLowestNeighbor(int x, int y) {
   NEIGHBOR low_neighbor = NEIGHBOR::SELF;
   double low_val = m_usurf[ind2idx(x, y)];
   
-  for (unsigned int i=0; i<8; i++) {
+  for (unsigned int i=0; i<m_N_neighbors; i++) {
     const NEIGHBOR n = m_directions[i];
     const unsigned int idx = neighborIdx(n, x, y);
     const double val = m_usurf[idx];

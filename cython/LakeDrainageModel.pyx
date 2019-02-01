@@ -48,7 +48,8 @@ cdef class LakeDrainage:
                      cnp.ndarray[double, ndim=2, mode="c"] topg,
                      cnp.ndarray[double, ndim=2, mode="c"] thk,
                      cnp.ndarray[int, ndim=2, mode="c"] ocean_mask,
-                     double cell_area, double rho_i, double rho_w):
+                     double cell_area, double rho_i, double rho_w,
+                     int N_neighbors):
  
     self.x = x
     self.y = y
@@ -113,6 +114,7 @@ cdef class LakeDrainage:
 
     LakeDrainageModel.findDrainageBasins(self.xDim,
                                          self.yDim,
+                                         N_neighbors,
                                          &c_usurf[0, 0],
                                          &c_basin_id[0, 0],
                                          &c_drain_dir[0, 0],

@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 from netCDF4 import Dataset
 
 
-def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
+def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
   import ctypes
   import LakeDrainage as LD
 
@@ -55,7 +55,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000.):
 
   ncIn.close()
 
-  result = LD.LakeDrainage(x, y, depth, topg_filtered, thk, ocean_mask, cell_area, rho_i, rho_w)
+  result = LD.LakeDrainage(x, y, depth, topg_filtered, thk, ocean_mask, cell_area, rho_i, rho_w, int(N_neighbors))
 
   return result
 
