@@ -33,7 +33,7 @@ public:
     NW=8
   };
 
-  NEIGHBOR m_directions[8] = {NEIGHBOR::N, NEIGHBOR::NE, NEIGHBOR::E, NEIGHBOR::SE, NEIGHBOR::S, NEIGHBOR::SW, NEIGHBOR::W, NEIGHBOR::NW};
+  NEIGHBOR m_directions[8] = {NEIGHBOR::N, NEIGHBOR::E, NEIGHBOR::S, NEIGHBOR::W, NEIGHBOR::NE, NEIGHBOR::SE, NEIGHBOR::SW, NEIGHBOR::NW};
 
 protected:
   unsigned int m_nRows, m_nCols;
