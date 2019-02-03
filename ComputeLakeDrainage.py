@@ -40,7 +40,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
     thk = np.zeros(shape)
     
   try:
-    depth = getNcVarSlice(ncIn, 'lake_depth', tind, shape)
+    depth = getNcVarSlice(ncIn, 'lake_depth_filtered', tind, shape)
   except:
     print("   -> Setting it to zero")
     depth = np.zeros(shape)

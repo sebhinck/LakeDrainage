@@ -5,9 +5,9 @@ import pickle
 
 import ComputeLakeDrainage
 
-fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km_topg_filtered.nc'
+fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km_new.nc'
 
-path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis'
+path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis_new'
 
 if not os.path.isdir(path_out):
   os.mkdir(path_out)
