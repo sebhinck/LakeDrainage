@@ -14,12 +14,13 @@ public:
   void run(int *&spillway_idx, int *&drain_basin_id);
 
   enum SINK {
+    OTHER=-7,
     OCEAN=-6,
     NORTH=-5,
     EAST=-4,
     SOUTH=-3,
     WEST=-2,
-    UNDEFINED=-1,
+    UNDEFINED=-1
   };
 
   enum NEIGHBOR {

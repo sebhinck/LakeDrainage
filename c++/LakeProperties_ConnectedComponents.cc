@@ -75,7 +75,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double 
 }
 
 bool LakePropertiesCC::ForegroundCond(unsigned int r, unsigned int c) {
-  return (m_lake_depth[r * m_nCols + c] > 0.0);
+  return (std::abs(m_lake_depth[r * m_nCols + c]) < 1.e9);
 }
 
 void LakePropertiesCC::labelMap(unsigned int run_number,

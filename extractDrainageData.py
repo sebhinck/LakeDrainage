@@ -81,7 +81,7 @@ drain_dir_out.units = "1"
 for tind in tinds:
     print(tind)
     
-    result = ComputeLakeDrainage.LakeDrainage(fIn, tind=tind)
+    result = ComputeLakeDrainage.LakeDrainage(fIn, tind=tind, N_neighbors=8)
     
     topg_out[tind,:,:] = result.topg[:]
     thk_out[tind,:,:] = result.thk[:]
