@@ -1,6 +1,8 @@
 #ifndef _LAKEBASINS_H_
 #define _LAKEBASINS_H_
 
+#include<vector>
+
 class LakeBasins {
 public:
   LakeBasins(unsigned int n_rows,
@@ -65,8 +67,10 @@ private:
 
   void findBasins();
   int assignBasin(int x, int y);
+  int traceDrainagePath(unsigned int current_id, int *drain_basin_id, int *basin_sink, std::vector<int> &prev_ids);
 
   void findSpillways(int *&spillway_idx, int *&drain_basin_id);
+  void assignSpillway(int *spillway_idx, int *drain_basin_id, int *basin_sink, double *spillway_height, double *spillway_neighbor_height, bool update_all);
 
 };
 
