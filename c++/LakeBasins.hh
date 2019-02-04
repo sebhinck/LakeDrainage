@@ -66,7 +66,7 @@ private:
   void findBasins();
   int assignBasin(int x, int y);
 
-  void findSpillways(int *spillway_idx, int *drain_basin_id);
+  void findSpillways(int *&spillway_idx, int *&drain_basin_id);
 
 };
 
