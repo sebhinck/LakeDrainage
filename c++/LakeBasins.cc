@@ -57,66 +57,63 @@ void LakeBasins::findSpillways(int *&spillway_idx, int *&drain_basin_id) {
     spillway_neighbor_height[i] = std::numeric_limits<double>::max();
   }
 
-  assignSpillway(spillway_idx, drain_basin_id, basin_sink, spillway_height, spillway_neighbor_height, true);
+  bool loops_found = true;
 
-  {
+  while (loops_found) {
     //Check if basin ends up in a "drainage loop". If so, mark those and treat them as a single basin
+    loops_found = false;
+
+    assignSpillway(spillway_idx, drain_basin_id, basin_sink, spillway_height, spillway_neighbor_height);
+
+    //Follow down drainage path and check for loops
     std::vector<int> prev_ids(m_N_basins);
     prev_ids.clear();
     for (int current_id = 0; current_id < m_N_basins; current_id++) {
-      int result = traceDrainagePath(current_id, drain_basin_id, basin_sink, prev_ids);
-      if (result > SINK::UNDEFINED) {
-        drain_basin_id[current_id] = SINK::UNDEFINED;
+      const int result = traceDrainagePath(current_id, drain_basin_id, basin_sink, prev_ids);
+    }
+
+    //Relabel "End-basins" of loops. Next round they need to be re-calculated!
+    for (int current_id = 0; current_id < m_N_basins; current_id++) {
+      if (basin_sink[current_id] == SINK::LOOP) {
+        //basin is end of a loop. Set it to UNDEFINED
+        basin_sink[current_id] = SINK::UNDEFINED;
         spillway_idx[current_id] = -1;
         spillway_height[current_id] = std::numeric_limits<double>::max();
         spillway_neighbor_height[current_id] = std::numeric_limits<double>::max();
+        loops_found = true;
       }
     }
   }
-
-  assignSpillway(spillway_idx, drain_basin_id, basin_sink, spillway_height, spillway_neighbor_height, false);
-
-  {
-    //Update Lists for basins that are part of a loop
-    for (int current_id = 0; current_id < m_N_basins; current_id++) {
-      const int current_basin_sink = basin_sink[current_id];
-      if (current_basin_sink > SINK::UNDEFINED) {
-        spillway_idx[current_id] = spillway_idx[current_basin_sink];
-        drain_basin_id[current_id] = drain_basin_id[current_basin_sink];
-      }
-    }
-  }
-
 }
 
-void LakeBasins::assignSpillway(int *spillway_idx, int *drain_basin_id, int *basin_sink, double *spillway_height, double *spillway_neighbor_height, bool update_all) {
+int LakeBasins::find_basin_id(int id, int *basin_sink) {
+  if (id >= 0) {
+    int sink = basin_sink[id];
+    if (sink >= 0) {
+      return find_basin_id(sink, basin_sink);
+    } else {
+      return id;
+    }
+  } else {
+    return id;
+  }
+}
+
+void LakeBasins::assignSpillway(int *spillway_idx, int *drain_basin_id, int *basin_sink, double *spillway_height, double *spillway_neighbor_height) {
   for (unsigned int y = 0; y < m_nRows; ++y) {
     for (unsigned int x = 0; x < m_nCols; ++x) {
 
       const unsigned int self_idx = ind2idx(x, y);
-      int self_basin_id = m_basin_id[self_idx];
-      bool reapply = false;
+      const int self_basin_id = find_basin_id(m_basin_id[self_idx], basin_sink);
 
-      if ((self_basin_id >= 0) and (basin_sink[self_basin_id] > SINK::UNDEFINED)) {
-        //Part of loop -> check for parent basin
-        self_basin_id = basin_sink[self_basin_id];
-        reapply = true;
-      }
-
-      if ((self_basin_id >= 0) and (update_all or reapply)) {
-      //(((self_basin_id >= 0) and not reapply) or ((self_basin_id >= 0) )) {
+      if ((self_basin_id >= 0) and (basin_sink[self_basin_id] == SINK::UNDEFINED)) {
         const double self_height = m_usurf[self_idx];
         double height;
         unsigned int idx;
         for (unsigned int i=0; i<m_N_neighbors; i++) {
           const NEIGHBOR n = m_directions[i];
           const unsigned int n_idx = neighborIdx(n, x, y);
-          int n_basin_id = m_basin_id[n_idx];
-
-          if ((n_basin_id >= 0) and (basin_sink[n_basin_id] > SINK::UNDEFINED)) {
-            //Part of loop -> check for parent basin
-            n_basin_id = basin_sink[n_basin_id];
-          }
+          const int n_basin_id = find_basin_id(m_basin_id[n_idx], basin_sink);
 
           if (n_basin_id != self_basin_id) {
             const double n_height = m_usurf[n_idx];
@@ -151,29 +148,25 @@ int LakeBasins::traceDrainagePath(unsigned int current_id, int *drain_basin_id, 
   int sink = basin_sink[current_id];
 
   if (sink == SINK::UNDEFINED) {
-
+    //Check if this basin has already been visited before
     std::vector<int>::iterator prev_id = prev_ids.begin();
     while ((prev_id != prev_ids.end()) and ((unsigned int)(*prev_id) != current_id)) {
       ++prev_id;
     }
-
     if (prev_id != prev_ids.end()) {
       //Found loop
+      //Communicate to all affected basins
       std::vector<int>::iterator start_loop = prev_id;
-      int min_id = current_id;
       for (prev_id = start_loop; prev_id != prev_ids.end(); ++prev_id) {
-        if (*prev_id < min_id) {
-          min_id = *prev_id;
+        if (prev_id != prev_ids.end() -1) {
+          basin_sink[*prev_id] = *(prev_id +1);
+        } else {
+          basin_sink[*prev_id] = SINK::LOOP;
         }
       }
-      //Communicate to all affected basins
-      for (prev_id = start_loop; prev_id != prev_ids.end(); ++prev_id) {
-        basin_sink[*prev_id] = min_id;
-        std::cout<<*prev_id<<", ";
-      }
-      std::cout<<"\n";
+      //Set sink to the last element in the loop
+      sink = *(prev_ids.end() -1);
       prev_ids.clear();
-      sink = SINK::OTHER;
     } else {
       //No loop found -> Go to next basin
       prev_ids.push_back(current_id);

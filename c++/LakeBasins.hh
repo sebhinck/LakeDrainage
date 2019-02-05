@@ -16,7 +16,7 @@ public:
   void run(int *&spillway_idx, int *&drain_basin_id);
 
   enum SINK {
-    OTHER=-7,
+    LOOP=-7,
     OCEAN=-6,
     NORTH=-5,
     EAST=-4,
@@ -70,7 +70,8 @@ private:
   int traceDrainagePath(unsigned int current_id, int *drain_basin_id, int *basin_sink, std::vector<int> &prev_ids);
 
   void findSpillways(int *&spillway_idx, int *&drain_basin_id);
-  void assignSpillway(int *spillway_idx, int *drain_basin_id, int *basin_sink, double *spillway_height, double *spillway_neighbor_height, bool update_all);
+  void assignSpillway(int *spillway_idx, int *drain_basin_id, int *basin_sink, double *spillway_height, double *spillway_neighbor_height);
+  int find_basin_id(int id, int *basin_sink);
 
 };
 
