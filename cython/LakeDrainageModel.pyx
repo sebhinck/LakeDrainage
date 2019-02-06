@@ -7,12 +7,12 @@ import ctypes
 
 
 cdef enum sink:
-  OTHER=-7,
-  OCEAN=-6,
-  NORTH=-5,
-  EAST=-4,
-  SOUTH=-3,
-  WEST=-2,
+  OCEAN=-7,
+  NORTH=-6,
+  EAST=-5,
+  SOUTH=-4,
+  WEST=-3,
+  LOOP=-2,
   UNDEFINED=-1
 
 cnp.import_array()
