@@ -40,10 +40,16 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
     thk = np.zeros(shape)
     
   try:
-    depth = getNcVarSlice(ncIn, 'lake_depth_filtered', tind, shape)
+    depth = getNcVarSlice(ncIn, 'lake_depth', tind, shape)
   except:
     print("   -> Setting it to zero")
     depth = np.zeros(shape)
+
+  try:
+    depth_filtered = getNcVarSlice(ncIn, 'lake_depth_filtered', tind, shape)
+  except:
+    print("   -> Setting it to depth")
+    depth_filtered = depth
 
   try:
     ocean_mask = getNcVarSlice(ncIn, 'ocean_mask', tind, shape)
@@ -55,7 +61,14 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
 
   ncIn.close()
 
-  result = LD.LakeDrainage(x, y, depth, topg_filtered, thk, ocean_mask, cell_area, rho_i, rho_w, int(N_neighbors))
+  result = LD.LakeDrainage(x, y,
+                           depth, depth_filtered,
+                           topg,  topg_filtered,
+                           thk,
+                           ocean_mask,
+                           cell_area,
+                           rho_i, rho_w,
+                           int(N_neighbors))
 
   return result
 
@@ -116,9 +129,17 @@ def main():
   x_out[:] = result.x[:]
   y_out[:] = result.y[:]
 
+  surf_eff_out = ncOut.createVariable('surf_eff','f4', ['y','x'])
+  surf_eff_out[:] = result.surf_eff[:,:]
+  surf_eff_out.units = "m"
+
   depth_out = ncOut.createVariable('depth','f4', ['y','x'])
   depth_out[:] = result.depth[:,:]
   depth_out.units = "m"
+
+  depth_filtered_out = ncOut.createVariable('depth_filtered','f4', ['y','x'])
+  depth_filtered_out[:] = result.depth_filtered[:,:]
+  depth_filtered_out.units = "m"
 
   lake_ids_out = ncOut.createVariable('lake_ids','i', ['y','x'], fill_value=-1)
   lake_ids_out[:] = result.lake_mask[:,:]

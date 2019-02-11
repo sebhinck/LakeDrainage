@@ -55,8 +55,8 @@ topg_out.units = "m"
 thk_out = ncOut.createVariable('thk','f4', ['t','y','x'])
 thk_out.units = "m"
 
-usurf_out = ncOut.createVariable('usurf','f4', ['t','y','x'])
-usurf_out.units = "m"
+usurf_filtered_out = ncOut.createVariable('usurf_filtered','f4', ['t','y','x'])
+usurf_filtered_out.units = "m"
 
 surf_eff_out = ncOut.createVariable('surf_eff','f4', ['t','y','x'])
 surf_eff_out.units = "m"
@@ -86,7 +86,7 @@ for tind in tinds:
     topg_out[tind,:,:] = result.topg[:]
     thk_out[tind,:,:] = result.thk[:]
     depth_out[tind,:,:] = result.depth[:]
-    usurf_out[tind,:,:] = result.usurf[:]
+    usurf_filtered_out[tind,:,:] = result.usurf_filtered[:]
     surf_eff_out[tind,:,:] = result.surf_eff[:]
     ocean_mask_out[tind,:,:] = result.ocean_mask[:]
     lake_ids_out[tind,:,:] = result.lake_mask[:]
