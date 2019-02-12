@@ -267,6 +267,16 @@ data['Reindeer'] = pd.Series({'1ka': (729,480),
                               '8ka': (729,480)
 })
 
+LakeGroups = {"GreatLakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario"],
+                             "area": Nt*[0],
+                             "volume": Nt*[0]
+                            },
+              "Ojibway": {"names": ["Ojibway"],
+                          "area": Nt*[0],
+                          "volume": Nt*[0]
+                         }
+             }
+
 print(data)
 
 epsg='PROJCS["Lambert_Azimuthal_Equal_Area",\
@@ -369,7 +379,7 @@ def getDrainageRoute(_basin_id, Nmax = 10000):
 ###############################################################################
 shpName = os.path.join(path_out, Name_prefix)
 tableName = os.path.join(path_out, Name_prefix+"_summary.txt")
-
+tableGroupName = os.path.join(path_out, Name_prefix+"_LakeGroups.txt")
 #Write Projection file
 with open("%s.prj" % shpName, "w") as prj:
     prj.write(epsg)
@@ -442,3 +452,35 @@ with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") 
                 shp.line(route)
 
                 tab.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(lake, t[t_idx], lake_area, lake_vol, lake_level, lake_max_depth, sink_name))
+
+for lake in data.keys():
+    LakeGroupFound = None
+    for LakeGroup in LakeGroups.keys():
+        for namePart in LakeGroups[LakeGroup]['names']:
+            if namePart in lake:
+                LakeGroupFound = LakeGroup
+                break
+        if LakeGroupFound is not None:
+            break
+    if LakeGroupFound is not None:
+        for t_idx in range(Nt):
+            if not np.isnan(data[lake][t_idx]).any():
+                #print("Group: "+LakeGroupFound+" - "+lake+": "+t_name[t_idx])
+                ind = data[lake][t_idx]
+
+                lake_id = lake_ids.data[t_idx, ind[1], ind[0]]
+
+                lake_area = lakeData['areas'][t_idx][lake_id]/(1000**2)
+                lake_vol  = lakeData['volumes'][t_idx][lake_id]/(1000**3)
+
+                LakeGroups[LakeGroup]['area'][t_idx] += lake_area
+                LakeGroups[LakeGroup]['volume'][t_idx] += lake_vol
+
+with open(tableGroupName, "w") as tab:
+    tab.write("Name\tYear[kaBP]\tArea[km^2]\tVolume[km^3]\n")
+
+    for LakeGroup in LakeGroups.keys():
+        for t_idx in range(Nt):
+            if LakeGroups[LakeGroup]['area'][t_idx] > 0:
+                print(LakeGroup+"- "+t_name[t_idx]+": area:"+str(LakeGroups[LakeGroup]['area'][t_idx])+" vol:"+str(LakeGroups[LakeGroup]['volume'][t_idx]))
+                tab.write('{}\t{}\t{}\t{}\n'.format(LakeGroup, t[t_idx], LakeGroups[LakeGroup]['area'][t_idx], LakeGroups[LakeGroup]['volume'][t_idx]))
