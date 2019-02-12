@@ -7,10 +7,11 @@ LakePropertiesCC::LakePropertiesCC(unsigned int n_rows,
                                    unsigned int n_cols,
                                    double cell_area,
                                    double *lake_depth,
+                                   double *lake_level,
                                    int *lake_ids)
   : m_nRows(n_rows), m_nCols(n_cols),
     m_lake_depth(lake_depth), m_cell_area(cell_area),
-    m_lake_ids(lake_ids) {
+    m_lake_ids(lake_ids), m_lake_level(lake_level) {
   m_mask_run = new int [m_nRows * m_nCols];
   for (unsigned int i=0; i<(m_nRows * m_nCols); i++) {
     m_mask_run[i] = 0;
@@ -23,11 +24,11 @@ LakePropertiesCC::~LakePropertiesCC() {
 }
 
 
-void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double *&max_depth_out) {
+void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double *&max_depth_out, double *&lake_level_out) {
   unsigned int max_items = 2 * m_nRows;
 
   std::vector<unsigned int> parents(max_items), lengths(max_items), rows(max_items), columns(max_items);
-  std::vector<double> depths_sum(max_items), max_depth(max_items);
+  std::vector<double> depths_sum(max_items), max_depth(max_items), lake_level(max_items);
 
   for(unsigned int i = 0; i < 1; ++i) {
     parents[i]    = 0;
@@ -35,6 +36,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double 
     rows[i]       = 0;
     columns[i]    = 0;
     depths_sum[i] = 0.0;
+    lake_level[i] = 0.0;
   }
 
   unsigned int run_number = 0;
@@ -42,7 +44,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double 
   for (unsigned int r = 0; r < m_nRows; ++r) {
     for (unsigned int c = 0; c < m_nCols; ++c) {
       if (ForegroundCond(r, c)) {
-        checkForegroundPixel(c, r, run_number, rows, columns, parents, lengths, depths_sum, max_depth);
+        checkForegroundPixel(c, r, run_number, rows, columns, parents, lengths, depths_sum, max_depth, lake_level);
 
         if ((run_number + 1) == max_items) {
           max_items += m_nRows;
@@ -51,6 +53,7 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double 
           rows.resize(max_items);
           columns.resize(max_items);
           depths_sum.resize(max_items);
+          lake_level.resize(max_items);
           max_depth.resize(max_items);
         }
       }
@@ -58,15 +61,17 @@ void LakePropertiesCC::run(int &N_lakes, double *&area, double *&volume, double 
   }
 
   std::vector<unsigned int> N_sum(run_number);
-  labelRuns(run_number, parents, lengths, N_sum, depths_sum, max_depth, N_lakes);
+  labelRuns(run_number, parents, lengths, N_sum, depths_sum, max_depth, lake_level, N_lakes);
   
   area   = new double[N_lakes];
   volume = new double[N_lakes];
   max_depth_out = new double[N_lakes];
+  lake_level_out = new double[N_lakes];
   for (int i=0; i<N_lakes; i++) {
     area[i]   = N_sum[i] * m_cell_area;
     volume[i] = depths_sum[i] * m_cell_area;
     max_depth_out[i] = max_depth[i];
+    lake_level_out[i] = lake_level[i];
   }
   
   //N_lakes contains number of all lakes...
@@ -121,7 +126,8 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
                                         std::vector<unsigned int> &parents,
                                         std::vector<unsigned int> &lengths,
                                         std::vector<double> &depths_sum,
-                                        std::vector<double> &max_depth) {
+                                        std::vector<double> &max_depth,
+                                        std::vector<double> &lake_level) {
   if((c > 0) && (m_mask_run[r*m_nCols + (c-1)] > 0)) {
     // one to the left is also foreground: continue the run
     lengths[run_number] += 1;
@@ -144,7 +150,8 @@ void LakePropertiesCC::checkForegroundPixel(unsigned int c,
     parents[run_number] = parent;
     lengths[run_number] = 1;
     depths_sum[run_number] = m_lake_depth[r * m_nCols + c];
-    max_depth[run_number] = m_lake_depth[r * m_nCols + c];
+    max_depth[run_number]  = m_lake_depth[r * m_nCols + c];
+    lake_level[run_number] = m_lake_level[r * m_nCols + c];
   }
 
   if((r > 0) and (m_mask_run[(r - 1) * m_nCols + c] > 0)) {
@@ -161,6 +168,7 @@ void LakePropertiesCC::labelRuns(unsigned int run_number,
                                  std::vector<unsigned int> &N_sum,
                                  std::vector<double> &depths_sum,
                                  std::vector<double> &max_depth,
+                                 std::vector<double> &lake_level,
                                  int &N_lakes) {
   unsigned int label = 0;
   for(unsigned int k = 1; k <= run_number; ++k) {
@@ -170,6 +178,7 @@ void LakePropertiesCC::labelRuns(unsigned int run_number,
       N_sum[parents[k]] = lengths[k];
       depths_sum[parents[k]] = depths_sum[k];
       max_depth[parents[k]] = max_depth[k];
+      lake_level[parents[k]] = lake_level[k];
     } else {
       parents[k] = parents[parents[k]];
       N_sum[parents[k]] += lengths[k];

@@ -52,6 +52,12 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
     depth_filtered = depth
 
   try:
+    lake_level_map = getNcVarSlice(ncIn, 'lake_level', tind, shape)
+  except:
+    print("   -> Setting it to zero")
+    lake_level_map =  np.zeros(shape)
+
+  try:
     ocean_mask = getNcVarSlice(ncIn, 'ocean_mask', tind, shape)
   except:
     ocean_mask = np.zeros(shape)
@@ -65,6 +71,7 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
                            depth, depth_filtered,
                            topg,  topg_filtered,
                            thk,
+                           lake_level_map,
                            ocean_mask,
                            cell_area,
                            rho_i, rho_w,
@@ -104,17 +111,21 @@ def main():
   area = np.zeros(shape)
   volume = np.zeros(shape)
   max_depth = np.zeros(shape)
+  ll = np.zeros(shape)
+  ll[:] = np.nan
 
   for i in range(len(result.area)):
     area_i = result.area[i]
     volume_i = result.volume[i]
     max_depth_i = result.max_depth[i]
+    ll_i = result.lake_level[i]
 
     i_mask = (result.lake_mask == i)
 
     area[i_mask] = area_i/(1000. * 1000.)
     volume[i_mask] = volume_i/(1000. * 1000. * 1000.)
     max_depth[i_mask] = max_depth_i
+    ll[i_mask] = ll_i
 
   ncOut = Dataset('out.nc', 'w')
 
@@ -132,6 +143,10 @@ def main():
   surf_eff_out = ncOut.createVariable('surf_eff','f4', ['y','x'])
   surf_eff_out[:] = result.surf_eff[:,:]
   surf_eff_out.units = "m"
+
+  ll_out = ncOut.createVariable('lake_level','f4', ['y','x'])
+  ll_out[:] = ll[:,:]
+  ll_out.units = "m"
 
   depth_out = ncOut.createVariable('depth','f4', ['y','x'])
   depth_out[:] = result.depth[:,:]
