@@ -353,7 +353,7 @@ def getDrainageRoute(_basin_id, Nmax = 10000):
     basin_id = _basin_id
     
     while ((basin_id >= 0) and (N < Nmax)):
-        print(basin_id)
+        #print(basin_id)
         spillway_idx = basinData['spillway_idx'][t_idx][basin_id]
         spillway_ind = idx2ind(spillway_idx)
         path.append([x[spillway_ind[0]], y[spillway_ind[1]]])
@@ -361,7 +361,7 @@ def getDrainageRoute(_basin_id, Nmax = 10000):
         basin_id = basinData['drain_basin_id'][t_idx][basin_id]
         N=N+1
     
-    return [path]
+    return (basin_id, [path])
     
 
 ###############################################################################
@@ -379,7 +379,7 @@ with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") 
     shp.field('name', 'C')
     shp.field('kaBP', 'N')
 
-    tab.write("Name\tYear[kaBP]\tArea[km^2]\tVolume[km^3]\tLevel[m]\tMax depth[m]\n")
+    tab.write("Name\tYear[kaBP]\tArea[km^2]\tVolume[km^3]\tLevel[m]\tMax depth[m]\tSink\n")
 
     for lake in data.keys():
         for t_idx in range(Nt):
@@ -405,10 +405,40 @@ with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") 
                 lake_vol  = lakeData['volumes'][t_idx][lake_id]/(1000**3)
                 lake_level     = lakeData['lake_levels'][t_idx][lake_id]
                 lake_max_depth = lakeData['max_depths'][t_idx][lake_id]
+
+                sink, route =getDrainageRoute(lake_id)
                 
-                tab.write('{}\t{}\t{}\t{}\t{}\t{}\n'.format(lake, t[t_idx], lake_area, lake_vol, lake_level, lake_max_depth))
+                sink_name='NONE'
+                if sink == -16:
+                    sink_name = 'ATLANTIC'
+                elif sink == -15:
+                    sink_name = 'STLAWRENCE'
+                elif sink == -14:
+                    sink_name = 'HUDSONBAY'
+                elif sink == -13:
+                    sink_name = 'CANARCHIPEL'
+                elif sink == -12:
+                    sink_name = 'ARCTIC'
+                elif sink == -11:
+                    sink_name = 'BERINGS'
+                elif sink == -10:
+                    sink_name = 'PACIFIC'
+                elif sink == -7:
+                    sink_name = 'OCEAN'
+                elif sink == -6:
+                    sink_name = 'NORTH'
+                elif sink == -5:
+                    sink_name = 'EAST'
+                elif sink == -4:
+                    sink_name = 'SOUTH'
+                elif sink == -3:
+                    sink_name = 'WEST'
+                elif sink == -2:
+                    sink_name = 'LOOP'
+                else:
+                    sink_name = 'UNDEFINED'
 
-                #print(getDrainageRoute(lake_id))
                 shp.record(name=lake, kaBP=t[t_idx])
-                shp.line(getDrainageRoute(lake_id))
+                shp.line(route)
 
+                tab.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(lake, t[t_idx], lake_area, lake_vol, lake_level, lake_max_depth, sink_name))

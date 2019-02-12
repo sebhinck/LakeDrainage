@@ -16,6 +16,13 @@ public:
   void run(int *&spillway_idx, int *&drain_basin_id);
 
   enum SINK {
+    ATLANTIC=-16,
+    STLAWRENCE=-15,
+    HUDSONBAY=-14,
+    CANARCHIPEL=-13,
+    ARCTIC=-12,
+    BERINGS=-11,
+    PACIFIC=-10,
     OCEAN=-7,
     NORTH=-6,
     EAST=-5,

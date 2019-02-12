@@ -4,7 +4,7 @@ from __future__ import absolute_import, division, print_function
 from netCDF4 import Dataset
 
 
-def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
+def LakeDrainage(fIn, OceanBasinFile, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
   import ctypes
   import LakeDrainage as LD
 
@@ -67,12 +67,24 @@ def LakeDrainage(fIn, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
 
   ncIn.close()
 
+  try:
+    with Dataset(OceanBasinFile) as ncOceanBasin:
+      try:
+        oceanbasin_mask = getNcVarSlice(ncOceanBasin, 'mask', shape = shape)
+      except:
+        oceanbasin_mask = np.ones(shape) * -1
+  except:
+    oceanbasin_mask = np.ones(shape) * -1
+
+  oceanbasin_mask = oceanbasin_mask.astype(ctypes.c_int)
+
   result = LD.LakeDrainage(x, y,
                            depth, depth_filtered,
                            topg,  topg_filtered,
                            thk,
                            lake_level_map,
                            ocean_mask,
+                           oceanbasin_mask,
                            cell_area,
                            rho_i, rho_w,
                            int(N_neighbors))
@@ -104,7 +116,7 @@ def getNcVarSlice(nc, varname, tind = -1, shape = None):
 def main():
   options = parse_args()
 
-  result = LakeDrainage(options.fIn, options.tind, options.rhoi, options.rhow)
+  result = LakeDrainage(options.fIn, options.obIn, options.tind, options.rhoi, options.rhow)
 
   shape = [len(result.y), len(result.x)]
 
@@ -176,6 +188,10 @@ def main():
   basin_id_out[:] = result.basin_id[:,:]
   basin_id_out.units = "1"
 
+  oceanbasin_mask_out = ncOut.createVariable('oceanbasin_mask','i', ['y','x'])
+  oceanbasin_mask_out[:] = result.oceanbasin_mask[:,:]
+  oceanbasin_mask_out.units = "1"
+
   drain_dir_out = ncOut.createVariable('drain_dir','i', ['y','x'])
   drain_dir_out[:] = result.drain_dir[:,:]
   drain_dir_out.units = "1"
@@ -190,6 +206,7 @@ def parse_args():
   parser = ArgumentParser()
   parser.description = "Find drainage route of lakes"
   parser.add_argument("-i", "--input",  dest="fIn",  required=True, help="Input file", metavar="FILE", type=lambda x: is_valid_file(parser, x))
+  parser.add_argument("-ob", "--OceanBasin",  dest="obIn", help="Ocean Basin input file", metavar="FILE", type=lambda x: is_valid_file(parser, x), default=None)
   parser.add_argument('-tind', "--time-index", dest="tind", help="index of time dimension", default=-1, type=int)
   parser.add_argument('-rho_i', "--ice_density", dest="rhoi", help="Density of ice", default=910., type=float)
   parser.add_argument('-rho_w', "--fresh_water_density", dest="rhow", help="Density of fresh water", default=1000., type=float)

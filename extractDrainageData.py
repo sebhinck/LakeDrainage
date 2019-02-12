@@ -6,6 +6,7 @@ import pickle
 import ComputeLakeDrainage
 
 fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km_new.nc'
+obIn = '/scratch/users/shinck/IceModelling/Shapefiles/OceanBasins/Basins.nc'
 
 path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis_new'
 
@@ -82,7 +83,7 @@ drain_dir_out.units = "1"
 for tind in tinds:
     print(tind)
     
-    result = ComputeLakeDrainage.LakeDrainage(fIn, tind=tind, N_neighbors=8)
+    result = ComputeLakeDrainage.LakeDrainage(fIn, obIn, tind=tind, N_neighbors=4)
     
     topg_out[tind,:,:] = result.topg[:]
     thk_out[tind,:,:] = result.thk[:]

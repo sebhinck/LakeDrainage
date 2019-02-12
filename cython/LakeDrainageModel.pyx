@@ -7,6 +7,13 @@ import ctypes
 
 
 cdef enum sink:
+  ATLANTIC=-16,
+  STLAWRENCE=-15,
+  HUDSONBAY=-14,
+  CANARCHIPEL=-13,
+  ARCTIC=-12,
+  BERINGS=-11,
+  PACIFIC=-10,
   OCEAN=-7,
   NORTH=-6,
   EAST=-5,
@@ -32,6 +39,7 @@ cdef class LakeDrainage:
   cdef readonly cnp.ndarray thk
   cdef readonly cnp.ndarray lake_level_map
   cdef readonly cnp.ndarray ocean_mask
+  cdef readonly cnp.ndarray oceanbasin_mask
   cdef readonly cnp.ndarray lake_mask
   cdef readonly cnp.ndarray area
   cdef readonly cnp.ndarray volume
@@ -57,6 +65,7 @@ cdef class LakeDrainage:
                      cnp.ndarray[double, ndim=2, mode="c"] thk,
                      cnp.ndarray[double, ndim=2, mode="c"] lake_level_map,
                      cnp.ndarray[int, ndim=2, mode="c"] ocean_mask,
+                     cnp.ndarray[int, ndim=2, mode="c"] oceanbasin_mask,
                      double cell_area, double rho_i, double rho_w,
                      int N_neighbors):
  
@@ -69,6 +78,7 @@ cdef class LakeDrainage:
     self.thk = thk
     self.lake_level_map = lake_level_map
     self.ocean_mask = ocean_mask
+    self.oceanbasin_mask = oceanbasin_mask
     self.lake_mask = np.zeros_like(self.topg, dtype=ctypes.c_int)
 
     self.yDim, self.xDim = topg.shape[0], topg.shape[1]
@@ -119,6 +129,14 @@ cdef class LakeDrainage:
     self.basin_id[:,0]  = sink.WEST
     self.basin_id[:,-1] = sink.EAST
     self.basin_id[self.ocean_mask == 1] = sink.OCEAN
+
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 9)] = sink.PACIFIC
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 8)] = sink.BERINGS
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 7)] = sink.ARCTIC
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 6)] = sink.CANARCHIPEL
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 5)] = sink.HUDSONBAY
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 4)] = sink.STLAWRENCE
+    self.basin_id[(self.ocean_mask == 1) & (oceanbasin_mask == 3)] = sink.ATLANTIC
 
     self.drain_dir = np.zeros_like(self.topg, dtype=ctypes.c_int)
 
