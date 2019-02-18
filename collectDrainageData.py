@@ -25,7 +25,7 @@ for i in range(Nt):
 data = pd.DataFrame(index=t_name)
 
 #data['Agassiz'] = pd.Series({'0ka': (9,3), '20ka': (2,3)})
-data['HuronMichigan'] = pd.Series({'0ka': (1007,193),
+data['Huron-Michigan'] = pd.Series({'0ka': (1007,193),
                                    '1ka': (1007,193),
                                    '2ka': (1007,193),
                                    '3ka': (1007,193),
@@ -48,7 +48,7 @@ data['Michigan'] = pd.Series({'10ka': (1007,193),
                               '15ka': (935,150)
 })
 
-data['SuperiorHuronMichigan'] = pd.Series({'12ka': (1000,214)
+data['Huron-Michigan-Superior'] = pd.Series({'12ka': (1000,214)
 })
                                    
 data['Superior'] = pd.Series({'0ka': (930,252),
@@ -62,6 +62,7 @@ data['Superior'] = pd.Series({'0ka': (930,252),
                               '8ka': (930,252),
                               '9ka': (930,252),
                               '10ka': (930,252),
+                              '11ka': (930,252),
                               '13ka': (862,236)
 })
 
@@ -83,8 +84,10 @@ data['Erie'] = pd.Series({'0ka': (1035,150),
                           '17ka': (1013,136)
 })
 
-data['HuronErie'] = pd.Series({'15ka': (1013,152),
-                               '16ka': (1022,150)
+data['Erie-Huron'] = pd.Series({'15ka': (1013,152)
+})
+
+data['Erie-Huron-Michigan'] = pd.Series({'16ka': (1022,150)
 })
 
 data['Ontario'] = pd.Series({'0ka': (1088,192),
@@ -116,7 +119,7 @@ data['Nipigon'] = pd.Series({'1ka': (900,304),
                              '10ka': (900,304)
 })
 
-data['StClair'] = pd.Series({'0ka': (1011,150),
+data['St. Clair'] = pd.Series({'0ka': (1011,150),
                              '1ka': (1011,150),
                              '2ka': (1011,150),
                              '3ka': (1011,150),
@@ -195,7 +198,7 @@ data['Athabasca'] = pd.Series({'0ka': (641,530),
 })
 
 
-data['GreatBear'] = pd.Series({'0ka': (588,706),
+data['Great Bear'] = pd.Series({'0ka': (588,706),
                                '1ka': (588,706),
                                '2ka': (588,706),
                                '3ka': (588,706),
@@ -212,7 +215,7 @@ data['GreatBear'] = pd.Series({'0ka': (588,706),
 })
 
 
-data['GreatSlave'] = pd.Series({'1ka': (600,590),
+data['Great Slave'] = pd.Series({'1ka': (600,590),
                                 '2ka': (600,590),
                                 '3ka': (600,590),
                                 '4ka': (600,590),
@@ -237,14 +240,27 @@ data['McConnell'] = pd.Series({'10ka': (610,595),
                                '12ka': (600,600)
 })
 
-data['McConnell_outside'] = pd.Series({'13ka': (561,531),
+data['Souris'] = pd.Series({'15ka': (724,276)
+})
+
+data['Hind'] = pd.Series({'14ka': (729,300)
+})
+
+data['Sasketchewan'] = pd.Series({'13ka': (660,384)
+})
+
+data['Meadow'] = pd.Series({'13ka': (629,417),
+                            '12ka': (644,417)
+})
+
+data['X'] = pd.Series({'13ka': (561,531),
                                        '14ka': (505,577),
                                        '15ka': (505,577),
                                        '16ka': (507,584),
                                        '21ka': (525,600)
 })
 
-data['McConnell_outside2'] = pd.Series({'14ka': (588,445),
+data['Y'] = pd.Series({'14ka': (588,445),
                                         '15ka': (600,406)
 })
 
@@ -254,7 +270,7 @@ data['McKenzie'] = pd.Series({'14ka': (536,691)
 data['Ojibway'] = pd.Series({'9ka': (945,322)
 })
 
-data['Ojibway2'] = pd.Series({'9ka': (1021,365)
+data['Ojibway 2'] = pd.Series({'9ka': (1021,365)
 })
 
 data['Reindeer'] = pd.Series({'1ka': (729,480),
@@ -267,7 +283,7 @@ data['Reindeer'] = pd.Series({'1ka': (729,480),
                               '8ka': (729,480)
 })
 
-LakeGroups = {"GreatLakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario"],
+LakeGroups = {"Great Lakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario"],
                              "area": Nt*[0],
                              "volume": Nt*[0]
                             },
@@ -373,6 +389,103 @@ def getDrainageRoute(_basin_id, Nmax = 10000):
     
     return (basin_id, [path])
     
+def save_tabular(fname,
+                 data,
+                 caption='',
+                 formatter=None,
+                 column_format=None,
+                 columns=None,
+                 header = None,
+                 supertabular=True,
+                 twocolumn=True,
+                 append=False,
+                 na_rep='-'):
+
+    if columns is None:
+        columns = data.columns
+
+    if header is None:
+        header = [x for x in data.index.names]
+        header.extend([x for x in columns])
+
+    tex_str = df_filtered.to_latex(formatters=formatters,
+                                   escape=False,
+                                   column_format=column_format,
+                                   columns=columns,
+                                   na_rep=na_rep)
+
+    tex_str = tex_str.replace('NaN', na_rep)
+    tex_str = tex_str.replace('\\toprule', '\\tophline')
+    tex_str = tex_str.replace('\\midrule', '\\middlehline')
+    tex_str = tex_str.replace('\\bottomrule', '\\bottomhline')
+
+    old_head = tex_str.splitlines()[1]+'\n'+tex_str.splitlines()[2]+'\n'+tex_str.splitlines()[3]+'\n'
+
+    new_head = ' & '.join(header)+ "\\\\ \n"
+
+    if supertabular:
+        tex_str = tex_str.replace('\\begin{tabular}', '\\begin{supertabular}')
+        tex_str = tex_str.replace('\\end{tabular}', '\\end{supertabular}')
+        tex_str = tex_str.replace(old_head, "")
+        supertab_head = "\
+        \\tablefirsthead{%\n\
+          \\tophline \n\
+          "+ new_head +"\n\
+        } \n\
+        \\tablehead{% \n\
+           \\multicolumn{" + str(len(header)) + "}{l}{\\textbf{Table \\thetable} ~\\textit{(Continued)}}\\\\ \n\
+           \\middlehline \n\
+           " + new_head + "\n \
+           \\middlehline \n\
+        } \n\
+        \\tabletail{% \n\
+           \\bottomhline \n\
+           \\multicolumn{" + str(len(header)) + "}{r}{\\textit{To be continued}}\\\\ \n\
+        }\\tablelasttail{ \n\
+           % \n\
+        } \n\
+        \\topcaption{ \n\
+          " + caption + " \n\
+        } \n"
+        supertab_head = supertab_head.replace('        ', '')
+
+        tex_str = supertab_head + tex_str
+    else:
+        tex_str = tex_str.replace(old_head, '\\tophline \n'+new_head)
+        table='table'
+        if twocolumn:
+            table = table+'*'
+        indent="  "
+        tex_str = tex_str.replace('\n', '\n'+2*indent)
+        tex_str = tex_str.replace(tex_str.splitlines()[0], indent+tex_str.splitlines()[0])
+        tex_str = tex_str.replace(tex_str.splitlines()[-2]+'\n'+tex_str.splitlines()[-1], indent+tex_str.splitlines()[-2].strip()+'\n')
+        tex_str = '\\begin{'+table+'}[t] \n\
+                  '+indent+'\caption{ \n\
+                  '+2*indent+caption+'\n\
+                  '+indent+'} \n\
+                  ' + tex_str + '\
+                  \\end{'+table+'}'
+        tex_str = tex_str.replace('                  ','')
+
+    if append and os.path.isfile(fname):
+        file_flag = 'a'
+    else:
+        file_flag = 'w'
+
+
+    with open(fname, file_flag) as outFile:
+        if file_flag == 'a':
+            outFile.write('\n\n\n')
+        outFile.write(tex_str)
+
+###############################################################################
+### Check if output folder exist  #############################################
+###############################################################################
+try:
+    os.makedirs(os.path.join(path_out, 'latex'))
+except:
+    pass
+
 
 ###############################################################################
 ### Loop ######################################################################
@@ -380,11 +493,15 @@ def getDrainageRoute(_basin_id, Nmax = 10000):
 shpName = os.path.join(path_out, Name_prefix)
 tableName = os.path.join(path_out, Name_prefix+"_summary.txt")
 tableGroupName = os.path.join(path_out, Name_prefix+"_LakeGroups.txt")
+
+LakesDF = pd.DataFrame(columns=['Name', 'kaBP', 'Area', 'Volume', 'Level', 'max. Depth', 'Sink'])
+
 #Write Projection file
 with open("%s.prj" % shpName, "w") as prj:
     prj.write(epsg)
 
 
+#Save Shape files
 with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") as tab:
     shp.field('name', 'C')
     shp.field('kaBP', 'N')
@@ -416,35 +533,35 @@ with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") 
                 lake_level     = lakeData['lake_levels'][t_idx][lake_id]
                 lake_max_depth = lakeData['max_depths'][t_idx][lake_id]
 
-                sink, route =getDrainageRoute(lake_id)
+                sink, route = getDrainageRoute(lake_id)
                 
-                sink_name='NONE'
+                sink_name='None'
                 if sink == -16:
-                    sink_name = 'ATLANTIC'
+                    sink_name = 'Atlantic'
                 elif sink == -15:
-                    sink_name = 'STLAWRENCE'
+                    sink_name = 'St. Lawrence'
                 elif sink == -14:
-                    sink_name = 'HUDSONBAY'
+                    sink_name = 'Hudson Bay'
                 elif sink == -13:
-                    sink_name = 'CANARCHIPEL'
+                    sink_name = 'Arctic Arch.'
                 elif sink == -12:
-                    sink_name = 'ARCTIC'
+                    sink_name = 'Arctic'
                 elif sink == -11:
-                    sink_name = 'BERINGS'
+                    sink_name = 'Bering Strait'
                 elif sink == -10:
-                    sink_name = 'PACIFIC'
+                    sink_name = 'Pacific'
                 elif sink == -7:
-                    sink_name = 'OCEAN'
+                    sink_name = 'Ocean'
                 elif sink == -6:
-                    sink_name = 'NORTH'
+                    sink_name = 'North'
                 elif sink == -5:
-                    sink_name = 'EAST'
+                    sink_name = 'East'
                 elif sink == -4:
-                    sink_name = 'SOUTH'
+                    sink_name = 'South'
                 elif sink == -3:
-                    sink_name = 'WEST'
+                    sink_name = 'West'
                 elif sink == -2:
-                    sink_name = 'LOOP'
+                    sink_name = 'Loop'
                 else:
                     sink_name = 'UNDEFINED'
 
@@ -453,6 +570,15 @@ with shpf.Writer(shpName, shapeType=shpf.POLYLINE) as shp, open(tableName, "w") 
 
                 tab.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format(lake, t[t_idx], lake_area, lake_vol, lake_level, lake_max_depth, sink_name))
 
+                row = {'Name': lake, 'kaBP': t[t_idx], 'Area': lake_area, 'Volume': lake_vol, 'Level': lake_level, 'max. Depth': lake_max_depth, 'Sink': sink_name}
+                LakesDF = LakesDF.append(row, ignore_index=True)
+
+def clean_file_name(x, repl_list=[' ', ',','.','-'], repl_char=''):
+    for char in repl_list:
+        x = x.replace(char, repl_char)
+    return x
+
+#Collect data in DataFrame
 for lake in data.keys():
     LakeGroupFound = None
     for LakeGroup in LakeGroups.keys():
@@ -465,7 +591,6 @@ for lake in data.keys():
     if LakeGroupFound is not None:
         for t_idx in range(Nt):
             if not np.isnan(data[lake][t_idx]).any():
-                #print("Group: "+LakeGroupFound+" - "+lake+": "+t_name[t_idx])
                 ind = data[lake][t_idx]
 
                 lake_id = lake_ids.data[t_idx, ind[1], ind[0]]
@@ -476,11 +601,118 @@ for lake in data.keys():
                 LakeGroups[LakeGroup]['area'][t_idx] += lake_area
                 LakeGroups[LakeGroup]['volume'][t_idx] += lake_vol
 
+#Save data in Textfile
 with open(tableGroupName, "w") as tab:
     tab.write("Name\tYear[kaBP]\tArea[km^2]\tVolume[km^3]\n")
 
     for LakeGroup in LakeGroups.keys():
         for t_idx in range(Nt):
             if LakeGroups[LakeGroup]['area'][t_idx] > 0:
-                print(LakeGroup+"- "+t_name[t_idx]+": area:"+str(LakeGroups[LakeGroup]['area'][t_idx])+" vol:"+str(LakeGroups[LakeGroup]['volume'][t_idx]))
+                #print(LakeGroup+"- "+t_name[t_idx]+": area:"+str(LakeGroups[LakeGroup]['area'][t_idx])+" vol:"+str(LakeGroups[LakeGroup]['volume'][t_idx]))
                 tab.write('{}\t{}\t{}\t{}\n'.format(LakeGroup, t[t_idx], LakeGroups[LakeGroup]['area'][t_idx], LakeGroups[LakeGroup]['volume'][t_idx]))
+
+####Set Latex header format
+def fnum(x, n=2):
+    if type(x) is str:
+        return x
+    else:
+        if np.isnan(x):
+            return 'NaN'
+        else:
+            return ('$ {:,.'+str(n)+'f} $').format(x).replace(',', '\\,')
+
+fnum0 = lambda x: fnum(x,0)
+fnum1 = lambda x: fnum(x,1)
+fnum2 = lambda x: fnum(x,2)
+
+all_tables=list()
+
+headers = {'Name':'Name','kaBP': 'Time [$\\unit{\\mathrm{kaBP}}$]' ,'Area':'Area [$\unit{\mathrm{km}^2}$]', 'Volume':'Volume [$\unit{\mathrm{km}^3}$]', 'Level':'Level [$\unit{\mathrm{m}}$]', 'max. Depth': 'max. Depth [$\unit{\mathrm{m}}$]', 'Sink': 'Sink'}
+index_names = {'kaBP': 'Time [$\\unit{\\mathrm{kaBP}}$]', 'Name': 'Lake'}
+formatters={'kaBP':fnum0 ,'Area':fnum0, 'Volume':fnum1, 'Level':fnum1, 'max. Depth': fnum1}
+
+#Export as LaTex supertabular
+latex_table_long =  os.path.join(path_out,'latex', Name_prefix+"_long_table.tex")
+
+columns=[ 'Area', 'Volume', 'Level', 'max. Depth', 'Sink']
+indexes = ['kaBP', 'Name']
+
+header = [index_names[X] for X in indexes]
+header.extend([headers[X] for X in columns])
+
+df_filtered = LakesDF.sort_values(['kaBP' ,'Area'], ascending = [True, False])
+df_filtered.set_index(indexes, inplace=True)
+
+column_format = 'rl'+(len(header) -3)*'r'+'l'
+
+long_table_caption = "All lakes in one table"
+
+save_tabular(latex_table_long, df_filtered, long_table_caption, formatters, column_format, columns, header, supertabular=True)
+all_tables.append(latex_table_long)
+
+#Export Lake as LaTex tabular
+columns=[ 'Area', 'Volume', 'Level', 'max. Depth', 'Sink']
+indexes = ['kaBP']
+
+header = [index_names[X] for X in indexes]
+header.extend([headers[X] for X in columns])
+column_format = 'r'+(len(header) -2)*'r'+'l'
+
+for lake_name in data.keys():
+    latex_table_lake =  os.path.join(path_out,'latex', Name_prefix+"_"+clean_file_name(lake_name)+"_table.tex")
+
+    LakeDF_filtered = LakesDF[LakesDF['Name'] == lake_name]
+    df_filtered = LakeDF_filtered.sort_values(['kaBP' ,'Area'], ascending = [True, False])
+    df_filtered.set_index(indexes, inplace=True)
+
+    table_caption = lake_name
+
+    save_tabular(latex_table_lake, df_filtered, table_caption, formatters, column_format, columns, header, supertabular=False)
+    all_tables.append(latex_table_lake)
+
+
+
+
+#Export Lake Groups
+columns=[ 'Area', 'Volume', 'Level', 'max. Depth', 'Sink']
+indexes = ['Name']
+
+header = [index_names[X] for X in indexes]
+header.extend([headers[X] for X in columns])
+column_format = 'l'+(len(header) -2)*'r'+'l'
+
+for LakeGroup in LakeGroups:
+    append = False
+    latex_table_lakegroup = os.path.join(path_out,'latex', Name_prefix+"_"+clean_file_name(LakeGroup)+"Group_table.tex")
+
+    for t_idx in range(Nt):
+        if LakeGroups[LakeGroup]['area'][t_idx] > 0:
+            t_cur = t[t_idx]
+            area_cur = LakeGroups[LakeGroup]['area'][t_idx]
+            vol_cur  = LakeGroups[LakeGroup]['volume'][t_idx]
+
+            table_caption = LakeGroup+' '+str(t_cur)+'kaBP'
+
+            LakeDF_filtered = LakesDF[[any([NP in LN for NP in LakeGroups[LakeGroup]['names']]) for LN in LakesDF['Name']] & (LakesDF['kaBP'] == t_cur)]
+            df_filtered = LakeDF_filtered.sort_values(['Area'], ascending = [False])
+            df_filtered = df_filtered.append({'Name':'\\middlehline \\textbf{Total}', 'Area': area_cur, 'Volume': vol_cur, 'kaBP':t_cur}, ignore_index=True)
+            df_filtered.set_index(indexes, inplace=True)
+
+            save_tabular(latex_table_lakegroup, df_filtered, table_caption, formatters, column_format, columns, header, supertabular=False, append=append, na_rep='')
+            append = True
+
+    all_tables.append(latex_table_lakegroup)
+
+
+all_tables_tex="\
+\documentclass[esurf, manuscript]{copernicus} \n\
+\usepackage{multirow} \n\
+\usepackage{supertabular} \n\
+\n\
+\\begin{document} \n\n\
+"+" \n\n".join(["\\input{"+X+"}" for X in all_tables])+" \n \n\
+\\end{document}"
+
+all_tables_out_tex = os.path.join(path_out,'latex', Name_prefix+"_all_tables.tex")
+with open(all_tables_out_tex, 'w') as fOut:
+    fOut.write(all_tables_tex)
