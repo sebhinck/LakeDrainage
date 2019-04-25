@@ -32,23 +32,29 @@ data['Huron-Michigan'] = pd.Series({'0ka': (1007,193),
                                    '4ka': (1007,193),
                                    '5ka': (1007,193),
                                    '6ka': (1007,193),
-                                   '7ka': (1007,193),
-                                   '8ka': (1007,193),
-                                   '9ka': (1007,193),
-                                   '13ka': (1007,193),
-                                   '14ka': (1007,193)
+                                   '7ka': (1007,193)
 })
 
-data['Huron'] = pd.Series({'10ka': (1007,193),
-                           '11ka': (1007,193)
+data['Chippewa-Stanley'] = pd.Series({'8ka': (1007,193),
+                                      '9ka': (1007,193)
 })
 
-data['Michigan'] = pd.Series({'10ka': (1007,193),
-                              '11ka': (1007,193),
-                              '15ka': (935,150)
+data['Algonquin'] = pd.Series({'13ka': (1007,193),
+                               '14ka': (1007,193)
 })
 
-data['Huron-Michigan-Superior'] = pd.Series({'12ka': (1000,214)
+data['Stanley'] = pd.Series({'10ka': (1007,193),
+                             '11ka': (1007,193)
+})
+
+data['Chippewa'] = pd.Series({'10ka': (1007,193),
+                              '11ka': (1007,193)
+})
+
+data['Chicago'] = pd.Series({'15ka': (935,150)
+})
+
+data['Algonquin-Duluth'] = pd.Series({'12ka': (1000,214)
 })
                                    
 data['Superior'] = pd.Series({'0ka': (930,252),
@@ -58,13 +64,20 @@ data['Superior'] = pd.Series({'0ka': (930,252),
                               '4ka': (930,252),
                               '5ka': (930,252),
                               '6ka': (930,252),
-                              '7ka': (930,252),
-                              '8ka': (930,252),
-                              '9ka': (930,252),
-                              '10ka': (930,252),
-                              '11ka': (930,252),
-                              '13ka': (862,236)
+                              '7ka': (930,252)
 })
+
+data['Hughton'] = pd.Series({'8ka': (930,252),
+                             '9ka': (930,252)
+})
+
+data['Minong'] = pd.Series({'10ka': (930,252)
+})
+
+data['Duluth'] = pd.Series({'13ka': (862,236),
+                            '11ka': (930,252)
+})
+
 
 data['Erie'] = pd.Series({'0ka': (1035,150),
                           '1ka': (1035,150),
@@ -80,14 +93,16 @@ data['Erie'] = pd.Series({'0ka': (1035,150),
                           '11ka': (1035,150),
                           '12ka': (1057,164),
                           '13ka': (1057,164),
-                          '14ka': (1060,164),
-                          '17ka': (1013,136)
+                          '14ka': (1060,164)
 })
 
-data['Erie-Huron'] = pd.Series({'15ka': (1013,152)
+data['Maumee'] = pd.Series({'17ka': (1013,136)
 })
 
-data['Erie-Huron-Michigan'] = pd.Series({'16ka': (1022,150)
+data['Warren'] = pd.Series({'15ka': (1013,152)
+})
+
+data['Arkona-Chicago'] = pd.Series({'16ka': (1022,150)
 })
 
 data['Ontario'] = pd.Series({'0ka': (1088,192),
@@ -103,8 +118,10 @@ data['Ontario'] = pd.Series({'0ka': (1088,192),
                              '10ka': (1088,192),
                              '11ka': (1088,192),
                              '12ka': (1088,192),
-                             '13ka': (1088,192),
-                             '14ka': (1088,192)
+                             '13ka': (1088,192)
+})
+
+data['Iroquis'] = pd.Series({'14ka': (1088,192)
 })
 
 data['Nipigon'] = pd.Series({'1ka': (900,304),
@@ -216,8 +233,7 @@ data['Athabasca'] = pd.Series({'0ka': (641,530),
                                '6ka': (641,530),
                                '7ka': (641,530),
                                '8ka': (641,530),
-                               '9ka': (641,530),
-                               '10ka': (641,530)
+                               '9ka': (641,530)
 })
 
 
@@ -230,11 +246,7 @@ data['Great Bear'] = pd.Series({'0ka': (588,706),
                                '6ka': (588,706),
                                '7ka': (588,706),
                                '8ka': (588,706),
-                               '9ka': (588,706),
-                               '10ka': (604,702),
-                               '11ka': (604,702),
-                               '13ka': (592,706),
-                               '14ka': (592,706)
+                               '9ka': (588,706)
 })
 
 
@@ -260,7 +272,9 @@ data['Agassiz'] = pd.Series({'9ka': (770,384),
 
 data['McConnell'] = pd.Series({'10ka': (610,595),
                                '11ka': (610,595),
-                               '12ka': (600,600)
+                               '12ka': (600,600),
+                               '13ka': (592,706),
+                               '14ka': (592,706)
 })
 
 data['Souris'] = pd.Series({'15ka': (724,276)
@@ -290,7 +304,8 @@ data['Y'] = pd.Series({'14ka': (588,445),
 data['McKenzie'] = pd.Series({'14ka': (536,691)
 })
 
-data['Ojibway'] = pd.Series({'9ka': (945,322)
+data['Ojibway'] = pd.Series({'9ka': (945,322),
+                             '10ka': (1053, 304)
 })
 
 data['Ojibway 2'] = pd.Series({'9ka': (1021,365)
@@ -311,7 +326,7 @@ data['Missoula'] = pd.Series({'16ka': (497,313),
                               '18ka': (494,316)
 })
 
-LakeGroups = {"Great Lakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario"],
+LakeGroups = {"Great Lakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario", "Maumee", "Chicago", "Arkona", "Warren", "Algonquin", "Duluth", "Minong", "Chippewa", "Stanley", "Hughton"],
                              "area": Nt*[0],
                              "volume": Nt*[0]
                             },
