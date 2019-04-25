@@ -182,6 +182,29 @@ data['Lahontan'] = pd.Series({'0ka': (400,150),
                               '21ka': (400,150)
 })
 
+data['Manly'] = pd.Series({'0ka': (407,79),
+                           '1ka': (407,79),
+                           '2ka': (407,79),
+                           '3ka': (407,79),
+                           '4ka': (407,79),
+                           '5ka': (407,79),
+                           '6ka': (407,79),
+                           '7ka': (407,79),
+                           '8ka': (407,79),
+                           '9ka': (407,79),
+                           '10ka': (407,79),
+                           '11ka': (407,79),
+                           '12ka': (407,79),
+                           '13ka': (407,79),
+                           '14ka': (407,79),
+                           '15ka': (407,79),
+                           '16ka': (407,79),
+                           '17ka': (407,79),
+                           '18ka': (407,79),
+                           '19ka': (407,79),
+                           '20ka': (407,79),
+                           '21ka': (407,79)
+})
 
 
 data['Athabasca'] = pd.Series({'0ka': (641,530),
@@ -246,7 +269,7 @@ data['Souris'] = pd.Series({'15ka': (724,276)
 data['Hind'] = pd.Series({'14ka': (729,300)
 })
 
-data['Sasketchewan'] = pd.Series({'13ka': (660,384)
+data['Saskatchewan'] = pd.Series({'13ka': (660,384)
 })
 
 data['Meadow'] = pd.Series({'13ka': (629,417),
@@ -254,14 +277,14 @@ data['Meadow'] = pd.Series({'13ka': (629,417),
 })
 
 data['X'] = pd.Series({'13ka': (561,531),
-                                       '14ka': (505,577),
-                                       '15ka': (505,577),
-                                       '16ka': (507,584),
-                                       '21ka': (525,600)
+                       '14ka': (505,577),
+                       '15ka': (505,577),
+                       '16ka': (507,584),
+                       '21ka': (525,600)
 })
 
 data['Y'] = pd.Series({'14ka': (588,445),
-                                        '15ka': (600,406)
+                       '15ka': (600,406)
 })
 
 data['McKenzie'] = pd.Series({'14ka': (536,691)
@@ -281,6 +304,11 @@ data['Reindeer'] = pd.Series({'1ka': (729,480),
                               '6ka': (729,480),
                               '7ka': (729,480),
                               '8ka': (729,480)
+})
+
+data['Missoula'] = pd.Series({'16ka': (497,313),
+                              '17ka': (495,316),
+                              '18ka': (494,316)
 })
 
 LakeGroups = {"Great Lakes": {"names": ["Superior", "Michigan", "Huron", "Erie", "Ontario"],
@@ -640,12 +668,12 @@ indexes = ['kaBP', 'Name']
 header = [index_names[X] for X in indexes]
 header.extend([headers[X] for X in columns])
 
-df_filtered = LakesDF.sort_values(['kaBP' ,'Area'], ascending = [True, False])
+df_filtered = LakesDF.sort_values(['kaBP' ,'Area'], ascending = [False, False])
 df_filtered.set_index(indexes, inplace=True)
 
 column_format = 'rl'+(len(header) -3)*'r'+'l'
 
-long_table_caption = "All lakes in one table"
+long_table_caption = "\\label{Tab:all_lakes_table}\n  All lakes in one table"
 
 save_tabular(latex_table_long, df_filtered, long_table_caption, formatters, column_format, columns, header, supertabular=True)
 all_tables.append(latex_table_long)
@@ -716,3 +744,27 @@ all_tables_tex="\
 all_tables_out_tex = os.path.join(path_out,'latex', Name_prefix+"_all_tables.tex")
 with open(all_tables_out_tex, 'w') as fOut:
     fOut.write(all_tables_tex)
+    
+
+
+    
+columns=['Area', 'Volume', 'max. Depth', 'Sink']
+indexes = ['kaBP', 'Name']
+
+header = [index_names[X] for X in indexes]
+header.extend([headers[X] for X in columns])
+column_format = 'rl'+(len(header) -3)*'r'+'l'
+
+latex_table_CN_YD =  os.path.join(path_out,'latex', Name_prefix+"_CN_YD_table.tex")
+
+lake_names = ['Agassiz', 'McConnell', 'McKenzie', 'Souris', 'Hind', 'Great Bear', 'Saskatchewan', 'Ojibway', 'Ojibway 2', 'Meadow'] #'Michigan', 'Erie-Huron', 'Ontario', 'Huron-Michigan', 'Erie',
+year_list = [15,14,13,12,11,10,9]
+
+LakeDF_filtered = LakesDF[[X&Y for (X,Y) in zip([N in lake_names for N in LakesDF['Name']], [Y in year_list for Y in LakesDF['kaBP']])]]
+df_filtered = LakeDF_filtered.sort_values(['kaBP', 'Area'], ascending = [False, False])
+df_filtered.set_index(indexes, inplace=True)
+
+table_caption = "Test"
+
+save_tabular(latex_table_CN_YD, df_filtered, table_caption, formatters, column_format, columns, header, supertabular=False)
+all_tables.append(latex_table_lake)
