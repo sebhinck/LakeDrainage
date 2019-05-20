@@ -304,11 +304,11 @@ data['Y'] = pd.Series({'14ka': (588,445),
 data['McKenzie'] = pd.Series({'14ka': (536,691)
 })
 
-data['Ojibway'] = pd.Series({'9ka': (945,322),
+data['Ojibway'] = pd.Series({'9ka':  (1021,365),
                              '10ka': (1053, 304)
 })
 
-data['Ojibway 2'] = pd.Series({'9ka': (1021,365)
+data['Ojibway 2'] = pd.Series({'9ka': (945,322)
 })
 
 data['Reindeer'] = pd.Series({'1ka': (729,480),
