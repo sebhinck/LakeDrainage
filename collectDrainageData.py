@@ -688,7 +688,7 @@ df_filtered.set_index(indexes, inplace=True)
 
 column_format = 'rl'+(len(header) -3)*'r'+'l'
 
-long_table_caption = "\\label{Tab:all_lakes_table}\n  All lakes in one table"
+long_table_caption = "\\label{Tab:all_lakes_table}\n  Area, volume, lake level, maximum depth, and sink for all identified lakes within this study."
 
 save_tabular(latex_table_long, df_filtered, long_table_caption, formatters, column_format, columns, header, supertabular=True)
 all_tables.append(latex_table_long)
