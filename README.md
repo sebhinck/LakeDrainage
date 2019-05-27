@@ -2,7 +2,7 @@
 This tool is used to post-process data from the LakeCC model.
 
 ## Installation
-To install run `make all` in this folder. Package is not installed globally biut only here.
+To install run `make all` in this folder. Package is not installed globally; only here in this folder.
 
 ## Preparation
 To apply this tool all results of all time-slices of the LakeCC model need to be merged into a single netCDF file.
