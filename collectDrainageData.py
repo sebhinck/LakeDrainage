@@ -10,7 +10,8 @@ import shapefile as shpf
 ### Define variables ##########################################################
 ###############################################################################
 
-path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis_new'
+#Define path where drainage data is stored and output should be written
+path_data='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis_new'
 Name_prefix = 'Evan19_filtered10km'
 
 Nt=31
@@ -24,7 +25,7 @@ for i in range(Nt):
 
 data = pd.DataFrame(index=t_name)
 
-#data['Agassiz'] = pd.Series({'0ka': (9,3), '20ka': (2,3)})
+#Define Lakes that were identified and provide one location of the basin
 data['Huron-Michigan'] = pd.Series({'0ka': (1007,193),
                                    '1ka': (1007,193),
                                    '2ka': (1007,193),
@@ -352,9 +353,9 @@ epsg='PROJCS["Lambert_Azimuthal_Equal_Area",\
 ###############################################################################
 ### Read data #################################################################
 ###############################################################################
-ncInName = os.path.join(path_out, Name_prefix+"_drainage.nc")
-pickleLakeName  = os.path.join(path_out, Name_prefix+"_lakes.pickle")
-pickleBasinName = os.path.join(path_out, Name_prefix+"_basins.pickle")
+ncInName = os.path.join(path_data, Name_prefix+"_drainage.nc")
+pickleLakeName  = os.path.join(path_data, Name_prefix+"_lakes.pickle")
+pickleBasinName = os.path.join(path_data, Name_prefix+"_basins.pickle")
 
 ncIn = Dataset(ncInName, 'r')
 
@@ -525,7 +526,7 @@ def save_tabular(fname,
 ### Check if output folder exist  #############################################
 ###############################################################################
 try:
-    os.makedirs(os.path.join(path_out, 'latex'))
+    os.makedirs(os.path.join(path_data, 'latex'))
 except:
     pass
 
@@ -533,9 +534,12 @@ except:
 ###############################################################################
 ### Loop ######################################################################
 ###############################################################################
-shpName = os.path.join(path_out, Name_prefix)
-tableName = os.path.join(path_out, Name_prefix+"_summary.txt")
-tableGroupName = os.path.join(path_out, Name_prefix+"_LakeGroups.txt")
+
+#-> calculate drainage lake routes and save paths to shapefile
+
+shpName = os.path.join(path_data, Name_prefix)
+tableName = os.path.join(path_data, Name_prefix+"_summary.txt")
+tableGroupName = os.path.join(path_data, Name_prefix+"_LakeGroups.txt")
 
 LakesDF = pd.DataFrame(columns=['Name', 'kaBP', 'Area', 'Volume', 'Level', 'max. Depth', 'Sink'])
 
@@ -675,7 +679,7 @@ index_names = {'kaBP': 'Time [$\\unit{\\mathrm{kaBP}}$]', 'Name': 'Lake'}
 formatters={'kaBP':fnum0 ,'Area':fnum0, 'Volume':fnum1, 'Level':fnum1, 'max. Depth': fnum1}
 
 #Export as LaTex supertabular
-latex_table_long =  os.path.join(path_out,'latex', Name_prefix+"_long_table.tex")
+latex_table_long =  os.path.join(path_data,'latex', Name_prefix+"_long_table.tex")
 
 columns=[ 'Area', 'Volume', 'Level', 'max. Depth', 'Sink']
 indexes = ['kaBP', 'Name']
@@ -702,7 +706,7 @@ header.extend([headers[X] for X in columns])
 column_format = 'r'+(len(header) -2)*'r'+'l'
 
 for lake_name in data.keys():
-    latex_table_lake =  os.path.join(path_out,'latex', Name_prefix+"_"+clean_file_name(lake_name)+"_table.tex")
+    latex_table_lake =  os.path.join(path_data,'latex', Name_prefix+"_"+clean_file_name(lake_name)+"_table.tex")
 
     LakeDF_filtered = LakesDF[LakesDF['Name'] == lake_name]
     df_filtered = LakeDF_filtered.sort_values(['kaBP' ,'Area'], ascending = [True, False])
@@ -726,7 +730,7 @@ column_format = 'l'+(len(header) -2)*'r'+'l'
 
 for LakeGroup in LakeGroups:
     append = False
-    latex_table_lakegroup = os.path.join(path_out,'latex', Name_prefix+"_"+clean_file_name(LakeGroup)+"Group_table.tex")
+    latex_table_lakegroup = os.path.join(path_data,'latex', Name_prefix+"_"+clean_file_name(LakeGroup)+"Group_table.tex")
 
     for t_idx in range(Nt):
         if LakeGroups[LakeGroup]['area'][t_idx] > 0:
@@ -756,7 +760,7 @@ all_tables_tex="\
 "+" \n\n".join(["\\input{"+X+"}" for X in all_tables])+" \n \n\
 \\end{document}"
 
-all_tables_out_tex = os.path.join(path_out,'latex', Name_prefix+"_all_tables.tex")
+all_tables_out_tex = os.path.join(path_data,'latex', Name_prefix+"_all_tables.tex")
 with open(all_tables_out_tex, 'w') as fOut:
     fOut.write(all_tables_tex)
     
@@ -770,7 +774,7 @@ header = [index_names[X] for X in indexes]
 header.extend([headers[X] for X in columns])
 column_format = 'rl'+(len(header) -3)*'r'+'l'
 
-latex_table_CN_YD =  os.path.join(path_out,'latex', Name_prefix+"_CN_YD_table.tex")
+latex_table_CN_YD =  os.path.join(path_data,'latex', Name_prefix+"_CN_YD_table.tex")
 
 lake_names = ['Agassiz', 'McConnell', 'McKenzie', 'Souris', 'Hind', 'Great Bear', 'Saskatchewan', 'Ojibway', 'Ojibway 2', 'Meadow'] #'Michigan', 'Erie-Huron', 'Ontario', 'Huron-Michigan', 'Erie',
 year_list = [15,14,13,12,11,10,9]
