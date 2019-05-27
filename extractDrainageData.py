@@ -1,20 +1,23 @@
 from netCDF4 import Dataset
 import os
-import numpy as np
 import pickle
 
 import ComputeLakeDrainage
 
+#Input file & Basin file
 fIn = '/scratch/users/shinck/IceModelling/Evan_19/lakes/merged_filtered10km_new.nc'
-obIn = '/scratch/users/shinck/IceModelling/Shapefiles/OceanBasins/Basins.nc'
+obIn = '/scratch/users/shinck/IceModelling/Python/LakeDrainage/Basins.nc'
 
+#Path to write the output
 path_out='/scratch/users/shinck/IceModelling/Evan_19/lakes/analysis_new'
 
 if not os.path.isdir(path_out):
   os.mkdir(path_out)
 
+#Name prefix of output files
 Name_prefix = 'Evan19_filtered10km'
 
+#number of time slices in input file
 Nt = 31
 
 tinds = range(Nt)
