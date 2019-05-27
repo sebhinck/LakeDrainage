@@ -11,6 +11,6 @@ Check if projection matches `epsg` string in `exportLakeDrainageData.py`. Basins
 Furthermore check lake locations and names in `exportLakeDrainageData.py`.
 
 ## Application
-Run the script `computeLakeCCDrainageData.py` to label lake basins calculated from by the LakeCC and collect data about all lakes. This data is written to a netCDF file and two **pickle** Files.
+Run the script `computeLakeCCDrainageData.py` to label lake basins calculated from by the LakeCC and collect data about all lakes. This data is written to a netCDF file and two *pickle* Files.
 
 After the first step run the script `exportLakeDrainageData.py` to process the identified lakes. The drainage route is determined and written to shape files. For these lakes several latex tales are created and written, that contain specified data.
