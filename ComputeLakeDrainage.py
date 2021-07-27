@@ -2,6 +2,99 @@
 
 from __future__ import absolute_import, division, print_function
 from netCDF4 import Dataset
+import numpy as np
+
+
+def LakeDrainagePISM(fIn, OceanBasinFile, Overlay=None, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
+  import ctypes
+  import LakeDrainage as LD
+
+  print ("Reading file "+fIn+" ...")
+  ncIn = Dataset(fIn, 'r')
+
+  ncIn.set_auto_mask(False)
+
+  topg = getNcVarSlice(ncIn, 'topg', tind)
+  shape = topg.shape
+
+  try:
+    x = (ncIn.variables['x'][:]).astype("double")
+  except:
+    x = np.arange(0, shape[1])
+
+  dx = (x[1] - x[0]).astype("double")
+  cell_area = dx * dx
+
+  try:
+    y = (ncIn.variables['y'][:]).astype("double")
+  except:
+    y = np.arange(0, shape[0])
+
+  if Overlay is None:
+    Overlay = np.zeros(shape)
+
+  topg_filtered = topg + Overlay
+
+  try:
+    thk = getNcVarSlice(ncIn, 'thk', tind, shape)
+  except:
+    print("   -> Setting it to zero")
+    thk = np.zeros(shape)
+
+  try:
+    depth = getNcVarSlice(ncIn, 'lake_depth', tind, shape)
+  except:
+    print("   -> Setting it to zero")
+    depth = np.zeros(shape)
+
+  depth_filtered = (depth - Overlay) * (depth > 0)
+
+  try:
+    lake_level_map = getNcVarSlice(ncIn, 'effective_lake_level_elevation', tind, shape)
+  except:
+    print("   -> Setting it to zero")
+    lake_level_map =  np.zeros(shape)
+
+  try:
+    sea_level = getNcVarSlice(ncIn, 'sea_level', tind, shape)
+  except:
+    sea_level = np.zeros(shape)
+
+
+
+  ocean_mask = ((topg + (rho_i/rho_w)*thk) < sea_level)
+
+  ocean_mask = ocean_mask.astype(ctypes.c_int)
+
+  print(ocean_mask)
+
+  ncIn.close()
+
+  try:
+    with Dataset(OceanBasinFile) as ncOceanBasin:
+      try:
+        oceanbasin_mask = getNcVarSlice(ncOceanBasin, 'mask', shape = shape)
+      except:
+        oceanbasin_mask = np.ones(shape) * -1
+  except:
+    oceanbasin_mask = np.ones(shape) * -1
+
+  oceanbasin_mask = oceanbasin_mask.astype(ctypes.c_int)
+
+  result = LD.LakeDrainage(x, y,
+                           depth, depth_filtered,
+                           topg,  topg_filtered,
+                           thk,
+                           lake_level_map,
+                           ocean_mask,
+                           oceanbasin_mask,
+                           cell_area,
+                           rho_i, rho_w,
+                           int(N_neighbors))
+
+  return result
+
+
 
 
 def LakeDrainage(fIn, OceanBasinFile, tind = 0, rho_i = 910., rho_w = 1000., N_neighbors = 4):
@@ -38,7 +131,7 @@ def LakeDrainage(fIn, OceanBasinFile, tind = 0, rho_i = 910., rho_w = 1000., N_n
   except:
     print("   -> Setting it to zero")
     thk = np.zeros(shape)
-    
+
   try:
     depth = getNcVarSlice(ncIn, 'lake_depth', tind, shape)
   except:
