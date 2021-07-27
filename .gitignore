@@ -3,5 +3,6 @@ cython/LakeDrainageModel.cpp
 *.nc
 *.grd.gz
 build/
+__pycache__/
 *.so
 ComputeLakeDrainage.pyc
